@@ -1,34 +1,6 @@
+version: '3.8'
+
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql_db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: prueba_mysql
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-  mongo:
-    image: mongo:latest
-    container_name: mongodb_db
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-
-  cassandra:
-    image: cassandra:latest
-    container_name: cassandra_db
-    restart: always
-    ports:
-      - "9042:9042"
-    volumes:
-      - cassandra_data:/var/lib/cassandra
-
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver_db
@@ -42,7 +14,4 @@ services:
       - sqlserver_data:/var/opt/mssql
 
 volumes:
-  mysql_data:
-  mongo_data:
-  cassandra_data:
   sqlserver_data:
