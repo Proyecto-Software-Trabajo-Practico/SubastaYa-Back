@@ -3,9 +3,21 @@ using Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Configuración de CORS (Intercambio de recursos de origen cruzado) para el Frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:5173" // React / Vite 
+              )
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // Registro de servicios de la capa Data
 builder.Services.AddDataServices(builder.Configuration);
@@ -20,6 +32,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Habilitar la política de CORS (debe ir antes de los endpoints)
+app.UseCors("AllowFrontend");
 
 var summaries = new[]
 {
