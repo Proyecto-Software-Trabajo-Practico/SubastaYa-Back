@@ -1,47 +1,45 @@
 using Domain.Common;
-using Domain.ValueObjects;
 using System;
+using System.Collections.Generic;
 
 namespace Domain.Entities;
 
 public class Billetera : BaseEntity
 {
     public int UsuarioId { get; private set; }
+    public virtual Usuario Usuario { get; private set; } = null!;
     
-    public Dinero SaldoTotal { get; private set; }
-    public Dinero SaldoRetenido { get; private set; }
-    public Dinero SaldoDisponible { get; private set; }
+    public decimal SaldoTotal { get; private set; }
+    public decimal SaldoRetenido { get; private set; }
+    public decimal SaldoDisponible { get; private set; }
 
-    // Control de concurrencia optimista: previene condiciones de carrera cuando 
-    // operaciones simultáneas intentan modificar el saldo retenido/disponible al mismo tiempo.
+    public virtual ICollection<TransaccionLedger> Transacciones { get; private set; } = new List<TransaccionLedger>();
+
     public int Version { get; private set; }
 
     public Billetera(int usuarioId)
     {
         UsuarioId = usuarioId;
-        SaldoTotal = Dinero.Zero;
-        SaldoRetenido = Dinero.Zero;
-        SaldoDisponible = Dinero.Zero;
+        SaldoTotal = 0m;
+        SaldoRetenido = 0m;
+        SaldoDisponible = 0m;
     }
 
     private Billetera() { 
-        SaldoTotal = null!;
-        SaldoRetenido = null!;
-        SaldoDisponible = null!;
-    } // Para EF Core
-
-    public void Depositar(Dinero monto)
-    {
-        SaldoTotal = new Dinero(SaldoTotal.Monto + monto.Monto);
-        SaldoDisponible = new Dinero(SaldoDisponible.Monto + monto.Monto);
     }
 
-    public void RetenerSaldo(Dinero monto)
+    public void Depositar(decimal monto)
     {
-        if (SaldoDisponible.Monto < monto.Monto)
+        SaldoTotal += monto;
+        SaldoDisponible += monto;
+    }
+
+    public void RetenerSaldo(decimal monto)
+    {
+        if (SaldoDisponible < monto)
             throw new InvalidOperationException("Saldo disponible insuficiente para realizar la retención.");
 
-        SaldoDisponible = new Dinero(SaldoDisponible.Monto - monto.Monto);
-        SaldoRetenido = new Dinero(SaldoRetenido.Monto + monto.Monto);
+        SaldoDisponible -= monto;
+        SaldoRetenido += monto;
     }
 }

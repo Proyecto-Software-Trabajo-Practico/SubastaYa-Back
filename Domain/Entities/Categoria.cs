@@ -17,7 +17,7 @@ public class Categoria : BaseEntity
         UrlIcono = urlIcono;
     }
 
-    private Categoria() { // Para EF Core 
+    private Categoria() {
         Nombre = null!;
     }
 }
