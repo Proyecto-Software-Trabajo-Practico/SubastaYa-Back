@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Persistence
@@ -139,6 +139,9 @@ namespace Data.Persistence
                       .IsRequired(false)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+
+            // Llamar al script de carga de datos iniciales
+            DataSeeder.Seed(modelBuilder);
         }
     }
 }
