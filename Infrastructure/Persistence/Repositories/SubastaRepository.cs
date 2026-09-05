@@ -55,6 +55,7 @@ public class SubastaRepository : ISubastaRepository
     {
         var ahora = DateTime.UtcNow;
         return await _context.Subastas
+            .Include(s => s.Pujas)
             .Where(s => s.Estado == "ACTIVA" && s.FechaFin <= ahora)
             .ToListAsync();
     }

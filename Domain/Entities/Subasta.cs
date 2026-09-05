@@ -54,6 +54,7 @@ public class Subasta : BaseEntity
     private Subasta() { 
         Titulo = null!;
         Descripcion = null!;
+        Estado = null!;
     } // Para EF Core
 
     // Regla de Negocio: Activar la subasta

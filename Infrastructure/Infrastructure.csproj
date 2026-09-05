@@ -7,9 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="BackgroundJobs\" />
-    <Folder Include="Persistence\Configurations\" />
-    <Folder Include="Repositories\" />
+    <Compile Remove="BackgroundJobs\**" />
+    <Compile Remove="Persistence\Configurations\**" />
+    <Compile Remove="Repositories\**" />
+    <EmbeddedResource Remove="BackgroundJobs\**" />
+    <EmbeddedResource Remove="Persistence\Configurations\**" />
+    <EmbeddedResource Remove="Repositories\**" />
+    <None Remove="BackgroundJobs\**" />
+    <None Remove="Persistence\Configurations\**" />
+    <None Remove="Repositories\**" />
   </ItemGroup>
 
   <ItemGroup>
