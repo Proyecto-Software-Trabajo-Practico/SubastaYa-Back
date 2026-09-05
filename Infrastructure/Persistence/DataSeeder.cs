@@ -2,7 +2,7 @@ using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 
-namespace Data.Persistence
+namespace Infrastructure.Persistence
 {
     public static class DataSeeder
     {

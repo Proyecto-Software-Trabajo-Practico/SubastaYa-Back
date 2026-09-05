@@ -1,11 +1,11 @@
-Ôªøusing System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace Data.Migrations
+namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class SeedData : Migration
@@ -18,10 +18,10 @@ namespace Data.Migrations
                 columns: new[] { "Id", "Nombre", "UrlIcono" },
                 values: new object[,]
                 {
-                    { 1, "Tecnolog√≠a", null },
+                    { 1, "TecnologÌa", null },
                     { 2, "Coleccionables", null },
                     { 3, "Indumentaria", null },
-                    { 4, "Veh√≠culos", null }
+                    { 4, "VehÌculos", null }
                 });
 
             migrationBuilder.InsertData(
@@ -30,7 +30,7 @@ namespace Data.Migrations
                 values: new object[,]
                 {
                     { 1, "vendedor@test.com", new DateTime(2026, 9, 1, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), "Vendedor Test", "hashed_pw" },
-                    { 2, "comprador1@test.com", new DateTime(2026, 9, 1, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), "Comprador L√≠der", "hashed_pw" },
+                    { 2, "comprador1@test.com", new DateTime(2026, 9, 1, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), "Comprador LÌder", "hashed_pw" },
                     { 3, "comprador2@test.com", new DateTime(2026, 9, 1, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), "Comprador Habilitado", "hashed_pw" },
                     { 4, "sinfondos@test.com", new DateTime(2026, 9, 1, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), "Comprador Sin Fondos", "hashed_pw" }
                 });
@@ -51,11 +51,11 @@ namespace Data.Migrations
                 columns: new[] { "Id", "CategoriaId", "Descripcion", "Estado", "FechaFin", "FechaInicio", "IncrementoMinimo", "PrecioBase", "Titulo", "UrlImagen", "VendedorId", "Version" },
                 values: new object[,]
                 {
-                    { 1, 1, "Subasta con 2 pujas.", "ACTIVA", new DateTime(2026, 9, 1, 12, 34, 51, 84, DateTimeKind.Utc).AddTicks(7368), new DateTime(2026, 9, 1, 11, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), 5000m, 10000m, "Activa Est√°ndar", null, 1, 1 },
-                    { 2, 1, "Alerta visual anti-sniping.", "ACTIVA", new DateTime(2026, 9, 1, 12, 10, 51, 84, DateTimeKind.Utc).AddTicks(7368), new DateTime(2026, 9, 1, 11, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), 1000m, 5000m, "Activa Cr√≠tica", null, 1, 1 },
-                    { 3, 2, "Inicia ma√±ana.", "PROGRAMADA", new DateTime(2026, 9, 3, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), new DateTime(2026, 9, 2, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), 2000m, 20000m, "Pr√≥xima", null, 1, 1 },
-                    { 4, 3, "Esperando liquidaci√≥n.", "ACTIVA", new DateTime(2026, 8, 31, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), new DateTime(2026, 8, 30, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), 500m, 5000m, "Vencida con Ganador", null, 1, 1 },
-                    { 5, 4, "Nadie puj√≥.", "ACTIVA", new DateTime(2026, 8, 31, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), new DateTime(2026, 8, 30, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), 5000m, 50000m, "Vencida Desierta", null, 1, 1 }
+                    { 1, 1, "Subasta con 2 pujas.", "ACTIVA", new DateTime(2026, 9, 1, 12, 34, 51, 84, DateTimeKind.Utc).AddTicks(7368), new DateTime(2026, 9, 1, 11, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), 5000m, 10000m, "Activa Est·ndar", null, 1, 1 },
+                    { 2, 1, "Alerta visual anti-sniping.", "ACTIVA", new DateTime(2026, 9, 1, 12, 10, 51, 84, DateTimeKind.Utc).AddTicks(7368), new DateTime(2026, 9, 1, 11, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), 1000m, 5000m, "Activa CrÌtica", null, 1, 1 },
+                    { 3, 2, "Inicia maÒana.", "PROGRAMADA", new DateTime(2026, 9, 3, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), new DateTime(2026, 9, 2, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), 2000m, 20000m, "PrÛxima", null, 1, 1 },
+                    { 4, 3, "Esperando liquidaciÛn.", "ACTIVA", new DateTime(2026, 8, 31, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), new DateTime(2026, 8, 30, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), 500m, 5000m, "Vencida con Ganador", null, 1, 1 },
+                    { 5, 4, "Nadie pujÛ.", "ACTIVA", new DateTime(2026, 8, 31, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), new DateTime(2026, 8, 30, 12, 9, 51, 84, DateTimeKind.Utc).AddTicks(7368), 5000m, 50000m, "Vencida Desierta", null, 1, 1 }
                 });
 
             migrationBuilder.InsertData(
