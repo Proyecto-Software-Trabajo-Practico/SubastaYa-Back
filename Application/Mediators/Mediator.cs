@@ -1,31 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Application.Interfaces;
-using Application.UseCases.Categorias.Handlers;
-using Application.UseCases.Categorias.Queries;
+﻿using Application.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Mediators;
 
 public class Mediator : IMediator
 {
-    // 1. El mediador es el único que conoce a TODOS los handlers del sistema
-    private readonly ObtenerCategoriasQueryHandler _obtenerCategoriasHandler;
-    // private readonly CrearSubastaCommandHandler _crearSubastaHandler;
+    private readonly IServiceProvider _serviceProvider;
 
-    public Mediator (ObtenerCategoriasQueryHandler obtenerCategoriasHandler)
+    public Mediator(IServiceProvider serviceProvider)
     {
-        _obtenerCategoriasHandler = obtenerCategoriasHandler;
+        _serviceProvider = serviceProvider;
     }
 
-    // 2. Implementamos los métodos SendAsync. 
-    // Cuando alguien llame a SendAsync pasándole un ObtenerCategoriasQuery, 
-    // el Mediador se lo pasa a su respectivo Handler.
-    public Task<List<CategoriaDto>> SendAsync(ObtenerCategoriasQuery query)
+    public async Task<TResponse> SendAsync<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
     {
-        return _obtenerCategoriasHandler.Handle(query);
+        // Forzamos el tipo de la interfaz para evitar ambigüedades de resolucion
+        IRequestHandler<TRequest, TResponse> handler = _serviceProvider.GetRequiredService<IRequestHandler<TRequest, TResponse>>();
+
+        return await handler.HandleAsync(request, cancellationToken);
     }
 }

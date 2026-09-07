@@ -1,3 +1,8 @@
+using Application.DTOs;
+using Application.Interfaces;
+using Application.Mediators;
+using Application.UseCases.Categorias.Handlers;
+using Application.UseCases.Categorias.Queries;
 using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,10 +27,9 @@ builder.Services.AddCors(options =>
 // Registro de servicios de la capa Infrastructure
 builder.Services.AddDataServices(builder.Configuration);
 // Registramos el Handler para que pueda ser inyectado en el Mediator
-builder.Services.AddScoped<Application.UseCases.Categorias.Handlers.ObtenerCategoriasQueryHandler>();
-
+builder.Services.AddScoped<IRequestHandler<ObtenerCategoriasQuery, List<CategoriaDto>>, ObtenerCategoriasQueryHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
-builder.Services.AddScoped<Application.Interfaces.IMediator, Application.Mediators.Mediator>();
+builder.Services.AddScoped<IMediator, Mediator>();
 // Para activar los Controller
 builder.Services.AddControllers();
 

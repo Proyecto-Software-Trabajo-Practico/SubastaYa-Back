@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs\" />
     <Folder Include="Mappings\" />
     <Folder Include="UseCases\Billeteras\Commands\" />
     <Folder Include="UseCases\Billeteras\Handlers\" />
@@ -15,9 +14,18 @@
     <Folder Include="UseCases\Categorias\Commands\" />
     <Folder Include="UseCases\Categorias\Handlers\" />
     <Folder Include="UseCases\Categorias\Queries\" />
+    <Folder Include="UseCases\Auditoria\" />
+    <Folder Include="UseCases\Puja\" />
     <Folder Include="UseCases\Transacciones\Commands\" />
     <Folder Include="UseCases\Transacciones\Handlers\" />
     <Folder Include="UseCases\Transacciones\Queries\" />
+    <Folder Include="UseCases\Usuario\Command\" />
+    <Folder Include="UseCases\Usuario\Handlers\" />
+    <Folder Include="UseCases\Usuario\Queries\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>

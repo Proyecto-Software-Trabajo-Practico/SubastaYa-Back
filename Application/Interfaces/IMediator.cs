@@ -8,9 +8,5 @@ namespace Application.Interfaces;
 
 public interface IMediator
 {
-    // ir agregando una sobrecarga por cada caso de uso que tenga el sistema
-    Task<List<Application.UseCases.Categorias.Queries.CategoriaDto>> SendAsync(Application.UseCases.Categorias.Queries.ObtenerCategoriasQuery query);
-
-    
-    //Task<int> SendAsync(Application.UseCases.Subastas.Commands.CrearSubastaCommand command);
+    Task<TResponse> SendAsync<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default);
 }
