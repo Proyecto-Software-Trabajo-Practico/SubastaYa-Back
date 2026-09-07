@@ -19,8 +19,15 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Registro de servicios de la capa Data
+// Registro de servicios de la capa Infrastructure
 builder.Services.AddDataServices(builder.Configuration);
+// Registramos el Handler para que pueda ser inyectado en el Mediator
+builder.Services.AddScoped<Application.UseCases.Categorias.Handlers.ObtenerCategoriasQueryHandler>();
+
+// Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
+builder.Services.AddScoped<Application.Interfaces.IMediator, Application.Mediators.Mediator>();
+// Para activar los Controller
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -56,6 +63,7 @@ app.MapGet("/weatherforecast", () =>
 .WithName("GetWeatherForecast")
 .WithOpenApi();
 
+app.MapControllers();
 app.Run();
 
 internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
