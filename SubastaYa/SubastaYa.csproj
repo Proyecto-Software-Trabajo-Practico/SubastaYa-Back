@@ -22,7 +22,6 @@
     <Folder Include="Endpoints\" />
     <Folder Include="Hubs\" />
     <Folder Include="Middlewares\" />
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
   <ItemGroup>

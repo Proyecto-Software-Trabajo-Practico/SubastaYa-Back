@@ -9,7 +9,15 @@
   <ItemGroup>
     <Folder Include="DTOs\" />
     <Folder Include="Mappings\" />
-    <Folder Include="UseCases\" />
+    <Folder Include="UseCases\Billeteras\Commands\" />
+    <Folder Include="UseCases\Billeteras\Handlers\" />
+    <Folder Include="UseCases\Billeteras\Queries\" />
+    <Folder Include="UseCases\Categorias\Commands\" />
+    <Folder Include="UseCases\Categorias\Handlers\" />
+    <Folder Include="UseCases\Categorias\Queries\" />
+    <Folder Include="UseCases\Transacciones\Commands\" />
+    <Folder Include="UseCases\Transacciones\Handlers\" />
+    <Folder Include="UseCases\Transacciones\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
