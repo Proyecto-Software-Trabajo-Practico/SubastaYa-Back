@@ -1,5 +1,4 @@
 namespace Application.UseCases.Billeteras.Queries;
 
-public record ObtenerSaldosQuery
-{
-}
+
+public record ObtenerSaldosQuery(int UsuarioId);
