@@ -1,147 +1,147 @@
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence;
+
+public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
 {
-    public class AppDbContext : DbContext
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+    public DbSet<Billetera> Billeteras { get; set; } = null!;
+    public DbSet<Categoria> Categorias { get; set; } = null!;
+    public DbSet<Subasta> Subastas { get; set; } = null!;
+    public DbSet<Puja> Pujas { get; set; } = null!;
+    public DbSet<TransaccionLedger> TransaccionesLedger { get; set; } = null!;
+    public DbSet<Auditoria> Auditorias { get; set; } = null!;
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        // 1. OBLIGATORIO: Llama al mapeo base de las tablas de Identity
+        base.OnModelCreating(modelBuilder);
 
-        public DbSet<Usuario> Usuarios { get; set; } = null!;
-        public DbSet<Billetera> Billeteras { get; set; } = null!;
-        public DbSet<Categoria> Categorias { get; set; } = null!;
-        public DbSet<Subasta> Subastas { get; set; } = null!;
-        public DbSet<Puja> Pujas { get; set; } = null!;
-        public DbSet<TransaccionLedger> TransaccionesLedger { get; set; } = null!;
-        public DbSet<Auditoria> Auditorias { get; set; } = null!;
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        // 2. Mapeo personalizado para propiedades exclusivas de tu entidad Usuario
+        modelBuilder.Entity<Usuario>(entity =>
         {
-            base.OnModelCreating(modelBuilder);
+            entity.ToTable("Usuarios"); // Mantiene la tabla personalizada 'Usuarios' en lugar de 'AspNetUsers'
 
-            // USUARIO
-            modelBuilder.Entity<Usuario>(entity => 
-            {
-                entity.ToTable("Usuarios");
-                entity.HasKey(e => e.Id);
-                
-                entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
-                entity.HasIndex(e => e.Email).IsUnique();
-                entity.Property(e => e.Nombre).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.PasswordHash).IsRequired();
-                
-                entity.Property(e => e.FechaRegistro).HasDefaultValueSql("GETUTCDATE()");
-            });
+            entity.Property(e => e.Nombre)
+                .IsRequired()
+                .HasMaxLength(255);
 
-            // BILLETERA
-            modelBuilder.Entity<Billetera>(entity =>
-            {
-                entity.ToTable("Billeteras");
-                entity.HasKey(e => e.Id);
-                
-                entity.Property(e => e.SaldoTotal).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.SaldoRetenido).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.SaldoDisponible).HasColumnType("decimal(18,2)");
-                
-                entity.Property(e => e.Version).IsConcurrencyToken();
+            entity.Property(e => e.FechaRegistro)
+                .HasDefaultValueSql("GETUTCDATE()");
+        });
 
-                entity.HasOne(e => e.Usuario)
-                    .WithOne()
-                    .HasForeignKey<Billetera>(b => b.UsuarioId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
+        // BILLETERA
+        modelBuilder.Entity<Billetera>(entity =>
+        {
+            entity.ToTable("Billeteras");
+            entity.HasKey(e => e.Id);
 
-            // CATEGORIA
-            modelBuilder.Entity<Categoria>(entity =>
-            {
-                entity.ToTable("Categorias");
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
-            });
+            entity.Property(e => e.SaldoTotal).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.SaldoRetenido).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.SaldoDisponible).HasColumnType("decimal(18,2)");
 
-            // SUBASTA
-            modelBuilder.Entity<Subasta>(entity =>
-            {
-                entity.ToTable("Subastas");
-                entity.HasKey(e => e.Id);
-                
-                entity.Property(e => e.Titulo).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.Estado).IsRequired().HasMaxLength(50);
-                entity.Property(e => e.PrecioBase).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.IncrementoMinimo).HasColumnType("decimal(18,2)");
-                
-                entity.Property(e => e.Version).IsConcurrencyToken();
+            entity.Property(e => e.Version).IsConcurrencyToken();
 
-                entity.HasOne(e => e.Vendedor)
-                      .WithMany()
-                      .HasForeignKey(e => e.VendedorId)
-                      .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Usuario)
+                .WithOne()
+                .HasForeignKey<Billetera>(b => b.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
 
-                entity.HasOne(e => e.Categoria)
-                      .WithMany()
-                      .HasForeignKey(e => e.CategoriaId)
-                      .OnDelete(DeleteBehavior.Restrict);
-            });
+        // CATEGORIA
+        modelBuilder.Entity<Categoria>(entity =>
+        {
+            entity.ToTable("Categorias");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
+        });
 
-            // PUJA
-            modelBuilder.Entity<Puja>(entity =>
-            {
-                entity.ToTable("Pujas");
-                entity.HasKey(e => e.Id);
-                
-                entity.Property(e => e.Monto).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.FechaPuja).HasDefaultValueSql("GETUTCDATE()");
-                
-                entity.HasOne(e => e.Subasta)
-                      .WithMany(s => s.Pujas)
-                      .HasForeignKey(e => e.SubastaId)
-                      .OnDelete(DeleteBehavior.Restrict);
+        // SUBASTA
+        modelBuilder.Entity<Subasta>(entity =>
+        {
+            entity.ToTable("Subastas");
+            entity.HasKey(e => e.Id);
 
-                entity.HasOne(e => e.Comprador)
-                      .WithMany()
-                      .HasForeignKey(e => e.CompradorId)
-                      .OnDelete(DeleteBehavior.Restrict);
-            });
+            entity.Property(e => e.Titulo).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Estado).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.PrecioBase).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.IncrementoMinimo).HasColumnType("decimal(18,2)");
 
-            // TRANSACCION_LEDGER
-            modelBuilder.Entity<TransaccionLedger>(entity =>
-            {
-                entity.ToTable("TransaccionesLedger");
-                entity.HasKey(e => e.Id);
-                
-                entity.Property(e => e.Tipo).IsRequired().HasMaxLength(50);
-                entity.Property(e => e.Monto).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.Fecha).HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.Version).IsConcurrencyToken();
 
-                entity.HasOne(e => e.Billetera)
-                      .WithMany(b => b.Transacciones)
-                      .HasForeignKey(e => e.BilleteraId)
-                      .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Vendedor)
+                  .WithMany()
+                  .HasForeignKey(e => e.VendedorId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne<Subasta>()
-                      .WithMany()
-                      .HasForeignKey(e => e.SubastaId)
-                      .IsRequired(false)
-                      .OnDelete(DeleteBehavior.Restrict);
-            });
+            entity.HasOne(e => e.Categoria)
+                  .WithMany()
+                  .HasForeignKey(e => e.CategoriaId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
 
-            // AUDITORIA
-            modelBuilder.Entity<Auditoria>(entity =>
-            {
-                entity.ToTable("Auditorias");
-                entity.HasKey(e => e.Id);
-                
-                entity.Property(e => e.Fecha).HasDefaultValueSql("GETUTCDATE()");
-                
-                entity.HasOne(e => e.Usuario)
-                      .WithMany()
-                      .HasForeignKey(e => e.UsuarioId)
-                      .IsRequired(false)
-                      .OnDelete(DeleteBehavior.Restrict);
-            });
+        // PUJA
+        modelBuilder.Entity<Puja>(entity =>
+        {
+            entity.ToTable("Pujas");
+            entity.HasKey(e => e.Id);
 
-            // Llamar al script de carga de datos iniciales
-            DataSeeder.Seed(modelBuilder);
-        }
+            entity.Property(e => e.Monto).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.FechaPuja).HasDefaultValueSql("GETUTCDATE()");
+
+            entity.HasOne(e => e.Subasta)
+                  .WithMany(s => s.Pujas)
+                  .HasForeignKey(e => e.SubastaId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Comprador)
+                  .WithMany()
+                  .HasForeignKey(e => e.CompradorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // TRANSACCION_LEDGER
+        modelBuilder.Entity<TransaccionLedger>(entity =>
+        {
+            entity.ToTable("TransaccionesLedger");
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Tipo).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Monto).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.Fecha).HasDefaultValueSql("GETUTCDATE()");
+
+            entity.HasOne(e => e.Billetera)
+                  .WithMany(b => b.Transacciones)
+                  .HasForeignKey(e => e.BilleteraId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne<Subasta>()
+                  .WithMany()
+                  .HasForeignKey(e => e.SubastaId)
+                  .IsRequired(false)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // AUDITORIA
+        modelBuilder.Entity<Auditoria>(entity =>
+        {
+            entity.ToTable("Auditorias");
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Fecha).HasDefaultValueSql("GETUTCDATE()");
+
+            entity.HasOne(e => e.Usuario)
+                  .WithMany()
+                  .HasForeignKey(e => e.UsuarioId)
+                  .IsRequired(false)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Carga de datos iniciales
+        DataSeeder.Seed(modelBuilder);
     }
 }

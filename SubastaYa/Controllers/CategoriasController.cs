@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.DTOs;
+using Application.Interfaces;
 using Application.UseCases.Categorias.Queries;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,17 +11,20 @@ public class CategoriasController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    // Inyectamos el mediador por constructor
     public CategoriasController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
     [HttpGet]
-    public async Task<IActionResult> ObtenerTodas()
+    public async Task<IActionResult> ObtenerTodas(CancellationToken cancellationToken)
     {
-        // El controller solo le pide al mediador que resuelva la Query
-        var resultado = await _mediator.SendAsync(new ObtenerCategoriasQuery());
+        // Especificamos el tipo de Query y la respuesta esperada List<CategoriaDto>
+        var resultado = await _mediator.SendAsync<ObtenerCategoriasQuery, List<CategoriaDto>>(
+            new ObtenerCategoriasQuery(),
+            cancellationToken
+        );
+
         return Ok(resultado);
     }
 }
