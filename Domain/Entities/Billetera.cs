@@ -1,6 +1,7 @@
 using Domain.Common;
 using System;
 using System.Collections.Generic;
+using Domain.Exceptions;
 
 namespace Domain.Entities;
 
@@ -30,6 +31,8 @@ public class Billetera : BaseEntity
 
     public void Depositar(decimal monto)
     {
+        if (monto <= 0)
+            throw new DomainException("El monto a depositar debe ser mayor a cero.");
         SaldoTotal += monto;
         SaldoDisponible += monto;
     }
@@ -37,7 +40,7 @@ public class Billetera : BaseEntity
     public void RetenerSaldo(decimal monto)
     {
         if (SaldoDisponible < monto)
-            throw new InvalidOperationException("Saldo disponible insuficiente para realizar la retención.");
+            throw new DomainException("Saldo disponible insuficiente...");
 
         SaldoDisponible -= monto;
         SaldoRetenido += monto;

@@ -5,9 +5,13 @@ using Application.UseCases.Categorias.Handlers;
 using Application.UseCases.Categorias.Queries;
 using Application.UseCases.Usuario.Commands;
 using Domain.Entities;
+using Application.UseCases.Billeteras.Commands;
+using Application.UseCases.Billeteras.Handlers;
+using Application.UseCases.Billeteras.Queries;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
+using SubastaYa.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +51,8 @@ builder.Services.AddIdentity<Usuario, IdentityRole<int>>(options =>
 builder.Services.AddScoped<IRequestHandler<ObtenerCategoriasQuery, List<CategoriaDto>>, ObtenerCategoriasQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<RegistrarUsuarioCommand, UsuarioDTO>, RegistrarUsuarioCommandHandler>();
 
+builder.Services.AddScoped<IRequestHandler<ObtenerSaldosQuery, BilleteraSaldosDto?>, ObtenerSaldosQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<DepositarFondosCommand, BilleteraSaldosDto>, DepositarFondosCommandHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
 
@@ -54,6 +60,9 @@ builder.Services.AddScoped<IMediator, Mediator>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
