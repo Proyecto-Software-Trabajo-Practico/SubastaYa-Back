@@ -1,10 +1,7 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
@@ -20,31 +17,31 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<Usuario?> GetByIdAsync(int id)
         {
-            return await _context.Usuarios.FindAsync(id);
+            return await _context.Users.FindAsync(id);
         }
 
         public async Task<Usuario?> GetByEmailAsync(string email)
         {
-            return await _context.Usuarios
+            return await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<IEnumerable<Usuario>> GetAllAsync()
         {
-            return await _context.Usuarios
+            return await _context.Users
                 .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task AddAsync(Usuario usuario)
         {
-            await _context.Usuarios.AddAsync(usuario);
+            await _context.Users.AddAsync(usuario);
         }
 
         public Task UpdateAsync(Usuario usuario)
         {
-            _context.Usuarios.Update(usuario);
+            _context.Users.Update(usuario);
             return Task.CompletedTask;
         }
     }

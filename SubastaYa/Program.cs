@@ -3,10 +3,14 @@ using Application.Interfaces;
 using Application.Mediators;
 using Application.UseCases.Categorias.Handlers;
 using Application.UseCases.Categorias.Queries;
+using Application.UseCases.Usuario.Commands;
+using Domain.Entities;
 using Application.UseCases.Billeteras.Commands;
 using Application.UseCases.Billeteras.Handlers;
 using Application.UseCases.Billeteras.Queries;
 using Infrastructure;
+using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
 using SubastaYa.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,13 +34,29 @@ builder.Services.AddCors(options =>
 
 // Registro de servicios de la capa Infrastructure
 builder.Services.AddDataServices(builder.Configuration);
-// Registramos el Handler para que pueda ser inyectado en el Mediator
+
+// Configuración de ASP.NET Core Identity
+builder.Services.AddIdentity<Usuario, IdentityRole<int>>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.User.RequireUniqueEmail = true;
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
+// Registramos los Handlers para que puedan ser inyectados en el Mediator
 builder.Services.AddScoped<IRequestHandler<ObtenerCategoriasQuery, List<CategoriaDto>>, ObtenerCategoriasQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<RegistrarUsuarioCommand, UsuarioDTO>, RegistrarUsuarioCommandHandler>();
+
 builder.Services.AddScoped<IRequestHandler<ObtenerSaldosQuery, BilleteraSaldosDto?>, ObtenerSaldosQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<DepositarFondosCommand, BilleteraSaldosDto>, DepositarFondosCommandHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
-// Para activar los Controller
+
+// Para activar los Controllers
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -55,6 +75,10 @@ app.UseHttpsRedirection();
 
 // Habilitar la política de CORS (debe ir antes de los endpoints)
 app.UseCors("AllowFrontend");
+
+// Habilitar Autenticación y Autorización para Identity
+app.UseAuthentication();
+app.UseAuthorization();
 
 var summaries = new[]
 {

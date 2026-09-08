@@ -1,26 +1,25 @@
 using Domain.Common;
+using Microsoft.AspNetCore.Identity;
 using System;
+using System.Security.Principal;
 
 namespace Domain.Entities;
 
-public class Usuario : BaseEntity
+public class Usuario : IdentityUser<int>
 {
-    public string Email { get; private set; }
     public string Nombre { get; private set; }
-    public string PasswordHash { get; private set; }
     public DateTime FechaRegistro { get; private set; }
 
-    public Usuario(string email, string nombre, string passwordHash)
+    public Usuario(string email, string nombre)
     {
         Email = email;
+        UserName = email;
         Nombre = nombre;
-        PasswordHash = passwordHash;
+        FechaRegistro = DateTime.UtcNow;
     }
 
     private Usuario() 
     { 
-        Email = null!;
         Nombre = null!;
-        PasswordHash = null!;
-    } // Para EF Core
+    }
 }
