@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Application.UseCases.Billeteras.Commands;
 using Application.UseCases.Billeteras.Queries;
+using Application.UseCases.Transacciones.Queries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SubastaYa.Controllers;
@@ -49,5 +50,23 @@ public class BilleterasController : ControllerBase
             cancellationToken
         );
         return Ok(saldosActualizados);
+    }
+    
+    [HttpGet("{usuarioId:int}/transacciones")]
+    public async Task<IActionResult> ObtenerHistorialTransacciones(
+        int usuarioId,
+        CancellationToken cancellationToken)
+    {
+        var transacciones = await _mediator.SendAsync<ObtenerHistorialTransaccionesQuery, List<TransaccionLedgerDTO>?>(
+            new ObtenerHistorialTransaccionesQuery(usuarioId),
+            cancellationToken
+        );
+
+        if (transacciones is null)
+        {
+            return NotFound(new { mensaje = $"No se encontró una billetera asociada al usuario con ID {usuarioId}." });
+        }
+
+        return Ok(transacciones);
     }
 }

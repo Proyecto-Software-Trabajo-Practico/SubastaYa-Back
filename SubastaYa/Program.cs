@@ -8,6 +8,8 @@ using Domain.Entities;
 using Application.UseCases.Billeteras.Commands;
 using Application.UseCases.Billeteras.Handlers;
 using Application.UseCases.Billeteras.Queries;
+using Application.UseCases.Transacciones.Handlers;
+using Application.UseCases.Transacciones.Queries;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -53,6 +55,7 @@ builder.Services.AddScoped<IRequestHandler<RegistrarUsuarioCommand, UsuarioDTO>,
 
 builder.Services.AddScoped<IRequestHandler<ObtenerSaldosQuery, BilleteraSaldosDto?>, ObtenerSaldosQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<DepositarFondosCommand, BilleteraSaldosDto>, DepositarFondosCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerHistorialTransaccionesQuery, List<TransaccionLedgerDTO>?>, ObtenerHistorialTransaccionesQueryHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
 
