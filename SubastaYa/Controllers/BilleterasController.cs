@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using Application.UseCases.Billeteras.Commands;
 using Application.UseCases.Billeteras.Queries;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,5 +35,19 @@ public class BilleterasController : ControllerBase
         }
 
         return Ok(resultado);
+    }
+    [HttpPost("{usuarioId:int}/depositos")]
+    public async Task<IActionResult> Depositar(
+        int usuarioId,
+        [FromBody] CargarSaldoDto request,
+        CancellationToken cancellationToken)
+    {
+        var command = new DepositarFondosCommand(usuarioId, request.Monto);
+
+        var saldosActualizados = await _mediator.SendAsync<DepositarFondosCommand, BilleteraSaldosDto>(
+            command,
+            cancellationToken
+        );
+        return Ok(saldosActualizados);
     }
 }

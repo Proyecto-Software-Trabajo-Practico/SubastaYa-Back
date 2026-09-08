@@ -3,9 +3,11 @@ using Application.Interfaces;
 using Application.Mediators;
 using Application.UseCases.Categorias.Handlers;
 using Application.UseCases.Categorias.Queries;
+using Application.UseCases.Billeteras.Commands;
 using Application.UseCases.Billeteras.Handlers;
 using Application.UseCases.Billeteras.Queries;
 using Infrastructure;
+using SubastaYa.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,12 +33,16 @@ builder.Services.AddDataServices(builder.Configuration);
 // Registramos el Handler para que pueda ser inyectado en el Mediator
 builder.Services.AddScoped<IRequestHandler<ObtenerCategoriasQuery, List<CategoriaDto>>, ObtenerCategoriasQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerSaldosQuery, BilleteraSaldosDto?>, ObtenerSaldosQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<DepositarFondosCommand, BilleteraSaldosDto>, DepositarFondosCommandHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
 // Para activar los Controller
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,5 +1,3 @@
 namespace Application.UseCases.Billeteras.Commands;
 
-public record DepositarFondosCommand
-{
-}
+public record DepositarFondosCommand(int UsuarioId, decimal Monto);
