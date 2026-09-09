@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
-{
+{   
     public class UsuarioRepository : IUsuarioRepository
-    {
+    { // Creo que este repositorio quedó obsoleto, ya que IdentityUser maneja la persistencia de usuarios, pero lo dejo por si acaso
         private readonly AppDbContext _context;
 
         public UsuarioRepository(AppDbContext context)
