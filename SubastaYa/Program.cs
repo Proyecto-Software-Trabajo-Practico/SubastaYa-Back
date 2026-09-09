@@ -1,4 +1,3 @@
-using System.Text;
 using Application.DTOs;
 using Application.Interfaces;
 using Application.Mediators;
@@ -9,6 +8,7 @@ using Application.UseCases.Categorias.Handlers;
 using Application.UseCases.Categorias.Queries;
 using Application.UseCases.Usuarios.Commands;
 using Application.UseCases.Usuarios.Handlers;
+using Application.UseCases.Usuarios.Queries;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Persistence;
@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SubastaYa.Middlewares;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,6 +109,9 @@ builder.Services.AddScoped<IRequestHandler<RegistrarUsuarioCommand, UsuarioDTO>,
 builder.Services.AddScoped<IRequestHandler<ObtenerSaldosQuery, BilleteraSaldosDto?>, ObtenerSaldosQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<DepositarFondosCommand, BilleteraSaldosDto>, DepositarFondosCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<IniciarSesionCommand, LoginRespuestaDTO>, IniciarSesionCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerUsuarioPorIdQuery, UsuarioDTO>, ObtenerUsuarioPorIdQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<CambiarEmailCommand, UsuarioDTO>, CambiarEmailCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<CambiarPasswordCommand, bool>, CambiarPasswordCommandHandler>();
 builder.Services.AddScoped<IMediator, Mediator>();
 
 // Controllers

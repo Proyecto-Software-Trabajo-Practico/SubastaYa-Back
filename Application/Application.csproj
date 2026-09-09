@@ -19,7 +19,6 @@
     <Folder Include="UseCases\Transacciones\Commands\" />
     <Folder Include="UseCases\Transacciones\Handlers\" />
     <Folder Include="UseCases\Transacciones\Queries\" />
-    <Folder Include="UseCases\Usuarios\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
