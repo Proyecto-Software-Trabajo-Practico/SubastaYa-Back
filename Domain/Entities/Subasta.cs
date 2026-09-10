@@ -1,6 +1,7 @@
 using Domain.Common;
 using System;
 using System.Collections.Generic;
+using Domain.Exceptions;
 
 namespace Domain.Entities;
 
@@ -28,27 +29,42 @@ public class Subasta : BaseEntity
     public int Version { get; private set; }
 
     public Subasta(
-        int vendedorId, 
-        int categoriaId, 
-        string titulo, 
-        string descripcion, 
-        decimal precioBase, 
-        decimal incrementoMinimo, 
-        DateTime fechaInicio, 
-        DateTime fechaFin)
+    int vendedorId,
+    int categoriaId,
+    string titulo,
+    string descripcion,
+    string? urlImagen,
+    decimal precioBase,
+    decimal incrementoMinimo,
+    DateTime fechaInicio,
+    DateTime fechaFin)
     {
-        if (fechaInicio >= fechaFin)
-            throw new ArgumentException("La fecha de inicio debe ser anterior a la fecha de fin.");
+        // Invariantes del Dominio: garantizan la integridad financiera de la subasta
+        if (precioBase <= 0)
+            throw new DomainException("El precio base debe ser mayor a cero.");
+
+        if (incrementoMinimo <= 0)
+            throw new DomainException("El incremento mínimo debe ser mayor a cero.");
+
+        // Invariantes Cronológicas: se admite 1 minuto de tolerancia por latencia de red/reloj
+        if (fechaInicio < DateTime.UtcNow.AddMinutes(-1))
+            throw new DomainException("La fecha de inicio no puede estar en el pasado.");
+
+        if (fechaFin <= fechaInicio)
+            throw new DomainException("La fecha de fin debe ser estrictamente posterior a la fecha de inicio.");
 
         VendedorId = vendedorId;
         CategoriaId = categoriaId;
         Titulo = titulo;
         Descripcion = descripcion;
+        UrlImagen = urlImagen;
         PrecioBase = precioBase;
         IncrementoMinimo = incrementoMinimo;
         FechaInicio = fechaInicio;
         FechaFin = fechaFin;
-        Estado = "PROGRAMADA";
+
+        // Regla de Negocio: Si inicia inmediatamente, nace ACTIVA; de lo contrario, PROGRAMADA
+        Estado = (fechaInicio <= DateTime.UtcNow) ? "ACTIVA" : "PROGRAMADA";
     }
 
     private Subasta() { 
@@ -61,7 +77,7 @@ public class Subasta : BaseEntity
     public void Activar()
     {
         if (Estado != "PROGRAMADA")
-            throw new InvalidOperationException("Solo se pueden activar subastas programadas.");
+            throw new DomainException("Solo se pueden activar subastas programadas.");
             
         Estado = "ACTIVA";
     }
