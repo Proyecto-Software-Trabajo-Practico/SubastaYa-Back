@@ -6,7 +6,5 @@ using System.Threading.Tasks;
 
 namespace Application.UseCases.Subastas.Queries
 {
-    internal class ObtenerDetalleSubastaQuery
-    {
-    }
+    public record ObtenerDetalleSubastaQuery(int Id);
 }

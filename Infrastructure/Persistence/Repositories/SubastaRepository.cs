@@ -41,6 +41,18 @@ public class SubastaRepository : ISubastaRepository
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 
+    // Solo lectura para la sala de subasta en vivo (carga ansiosa de categoría, vendedor y pujas con postor)
+    public async Task<Subasta?> GetDetalleByIdAsync(int id)
+    {
+        return await _context.Subastas
+            .AsNoTracking() 
+            .Include(s => s.Categoria)
+            .Include(s => s.Vendedor)
+            .Include(s => s.Pujas)
+                .ThenInclude(p => p.Comprador)
+            .FirstOrDefaultAsync(s => s.Id == id);
+    }
+
     // Solo lectura para el catálogo de subastas en curso del Frontend
     public async Task<IReadOnlyList<Subasta>> GetSubastasActivasAsync()
     {

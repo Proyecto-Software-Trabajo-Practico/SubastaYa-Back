@@ -12,6 +12,7 @@ namespace Application.Interfaces
         Task<Subasta?> GetByIdAsync(int id);
         Task<IReadOnlyList<Subasta>> GetAllAsync();
         Task<Subasta?> GetWithPujasByIdAsync(int id);
+        Task<Subasta?> GetDetalleByIdAsync(int id);
         Task<IReadOnlyList<Subasta>> GetSubastasActivasAsync();
         Task<IReadOnlyList<Subasta>> GetSubastasVencidasParaCierreAsync();
         Task AddAsync(Subasta subasta);

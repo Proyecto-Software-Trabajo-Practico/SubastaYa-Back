@@ -1,5 +1,4 @@
 namespace Application.UseCases.Transacciones.Queries;
 
-public record ObtenerHistorialTransaccionesQuery
-{
-}
+
+public record ObtenerHistorialTransaccionesQuery(int UsuarioId);

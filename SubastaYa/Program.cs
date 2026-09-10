@@ -10,6 +10,10 @@ using Application.UseCases.Usuarios.Commands;
 using Application.UseCases.Usuarios.Handlers;
 using Application.UseCases.Usuarios.Queries;
 using Domain.Entities;
+using Application.UseCases.Transacciones.Handlers;
+using Application.UseCases.Transacciones.Queries;
+using Application.UseCases.Subastas.Handlers;
+using Application.UseCases.Subastas.Queries;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -112,6 +116,9 @@ builder.Services.AddScoped<IRequestHandler<IniciarSesionCommand, LoginRespuestaD
 builder.Services.AddScoped<IRequestHandler<ObtenerUsuarioPorIdQuery, UsuarioDTO>, ObtenerUsuarioPorIdQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CambiarEmailCommand, UsuarioDTO>, CambiarEmailCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<CambiarPasswordCommand, bool>, CambiarPasswordCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerHistorialTransaccionesQuery, List<TransaccionLedgerDTO>?>, ObtenerHistorialTransaccionesQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>, ObtenerDetalleSubastaQueryHandler>();
+// Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
 
 // Controllers
