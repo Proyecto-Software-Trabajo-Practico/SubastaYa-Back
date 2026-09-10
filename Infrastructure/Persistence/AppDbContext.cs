@@ -144,4 +144,18 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
         // Carga de datos iniciales
         DataSeeder.Seed(modelBuilder);
     }
+
+    // Sobrescribimos SaveChangesAsync para evitar modificaciones o eliminaciones de registros de auditoría
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var auditoriasModificadas = ChangeTracker.Entries<Auditoria>()
+            .Any(e => e.State == EntityState.Modified || e.State == EntityState.Deleted);
+
+        if (auditoriasModificadas)
+        {
+            throw new InvalidOperationException("Los registros de auditoría son inmutables y no pueden ser modificados ni eliminados.");
+        }
+
+        return base.SaveChangesAsync(cancellationToken);
+    }
 }
