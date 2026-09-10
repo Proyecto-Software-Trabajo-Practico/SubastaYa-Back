@@ -1,6 +1,9 @@
-﻿using Application.DTOs;
+﻿using System.Security.Claims;
+using Application.DTOs;
 using Application.Interfaces;
-using Application.UseCases.Usuario.Commands;
+using Application.UseCases.Usuarios.Commands;
+using Application.UseCases.Usuarios.Queries;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SubastaYa.Controllers;
@@ -16,19 +19,143 @@ public class UsuariosController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("registro")]
+    private bool EsUsuarioAutorizado(int id)
+    {
+        var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        return int.TryParse(claimId, out var usuarioAutenticadoId) && usuarioAutenticadoId == id;
+    }
+
+    [HttpPost]
     [ProducesResponseType(typeof(UsuarioDTO), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Registrar([FromBody] RegistrarUsuarioCommand command, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Registrar(
+        [FromBody] RegistrarUsuarioCommand command,
+        CancellationToken cancellationToken)
     {
         try
         {
             var usuarioCreado = await _mediator.SendAsync<RegistrarUsuarioCommand, UsuarioDTO>(command, cancellationToken);
-            return CreatedAtAction(nameof(Registrar), new { id = usuarioCreado.Id }, usuarioCreado);
+            return CreatedAtAction(nameof(ObtenerPorId), new { id = usuarioCreado.Id }, usuarioCreado);
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new { mensaje = ex.Message });
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPost("login")]
+    [ProducesResponseType(typeof(LoginRespuestaDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> IniciarSesion(
+        [FromBody] IniciarSesionCommand command,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var respuesta = await _mediator.SendAsync<IniciarSesionCommand, LoginRespuestaDTO>(command, cancellationToken);
+            return Ok(respuesta);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(UsuarioDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ObtenerPorId(
+        [FromRoute] int id,
+        CancellationToken cancellationToken)
+    {
+        if (!EsUsuarioAutorizado(id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "No tienes permiso para acceder a esta información." });
+        }
+
+        try
+        {
+            var query = new ObtenerUsuarioPorIdQuery(id);
+            var resultado = await _mediator.SendAsync<ObtenerUsuarioPorIdQuery, UsuarioDTO>(query, cancellationToken);
+            return Ok(resultado);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPut("{id:int}/email")]
+    [ProducesResponseType(typeof(UsuarioDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CambiarEmail(
+        [FromRoute] int id,
+        [FromBody] CambiarEmailDTO dto,
+        CancellationToken cancellationToken)
+    {
+        if (!EsUsuarioAutorizado(id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "No tienes permiso para modificar este recurso." });
+        }
+
+        try
+        {
+            var command = new CambiarEmailCommand(id, dto.NuevoEmail);
+            var resultado = await _mediator.SendAsync<CambiarEmailCommand, UsuarioDTO>(command, cancellationToken);
+            return Ok(resultado);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPut("{id:int}/password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CambiarPassword(
+        [FromRoute] int id,
+        [FromBody] CambiarPasswordDTO dto,
+        CancellationToken cancellationToken)
+    {
+        if (!EsUsuarioAutorizado(id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "No tienes permiso para modificar este recurso." });
+        }
+
+        try
+        {
+            var command = new CambiarPasswordCommand(id, dto.PasswordActual, dto.NuevaPassword);
+            await _mediator.SendAsync<CambiarPasswordCommand, bool>(command, cancellationToken);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
         }
     }
 }
