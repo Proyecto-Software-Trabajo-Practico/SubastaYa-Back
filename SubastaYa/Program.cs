@@ -1,20 +1,22 @@
 using Application.DTOs;
 using Application.Interfaces;
 using Application.Mediators;
+using Application.UseCases.Auditorias.Handlers;
+using Application.UseCases.Auditorias.Queries;
 using Application.UseCases.Billeteras.Commands;
 using Application.UseCases.Billeteras.Handlers;
 using Application.UseCases.Billeteras.Queries;
 using Application.UseCases.Categorias.Handlers;
 using Application.UseCases.Categorias.Queries;
+using Application.UseCases.Subastas.Handlers;
+using Application.UseCases.Subastas.Queries;
+using Application.UseCases.Transacciones.Handlers;
+using Application.UseCases.Transacciones.Queries;
 using Application.UseCases.Usuarios.Commands;
 using Application.UseCases.Usuarios.Handlers;
 using Application.UseCases.Usuarios.Queries;
 using Application.UseCases.Subastas.Commands;
 using Domain.Entities;
-using Application.UseCases.Transacciones.Handlers;
-using Application.UseCases.Transacciones.Queries;
-using Application.UseCases.Subastas.Handlers;
-using Application.UseCases.Subastas.Queries;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -119,6 +121,8 @@ builder.Services.AddScoped<IRequestHandler<CambiarEmailCommand, UsuarioDTO>, Cam
 builder.Services.AddScoped<IRequestHandler<CambiarPasswordCommand, bool>, CambiarPasswordCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerHistorialTransaccionesQuery, List<TransaccionLedgerDTO>?>, ObtenerHistorialTransaccionesQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>, ObtenerDetalleSubastaQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriasQuery, IEnumerable<AuditoriaDTO>>, ObtenerAuditoriasQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriaPorEntidadQuery, IEnumerable<AuditoriaDTO>>, ObtenerAuditoriaPorEntidadQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerSubastasQuery, List<SubastaCardDTO>>, ObtenerSubastasQueryHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator

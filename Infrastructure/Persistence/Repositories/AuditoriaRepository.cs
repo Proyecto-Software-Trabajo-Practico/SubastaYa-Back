@@ -32,6 +32,15 @@ namespace Infrastructure.Persistence.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Auditoria>> GetAllAsync()
+        {
+            return await _context.Auditorias
+                .AsNoTracking()
+                .Include(a => a.Usuario)
+                .OrderByDescending(a => a.Fecha)
+                .ToListAsync();
+        }
+
         public async Task AddAsync(Auditoria auditoria)
         {
             await _context.Auditorias.AddAsync(auditoria);

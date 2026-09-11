@@ -19,10 +19,13 @@ public class UsuariosController : ControllerBase
         _mediator = mediator;
     }
 
-    private bool EsUsuarioAutorizado(int id)
+    private void ValidarAutorizacionUsuario(int id)
     {
         var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
-        return int.TryParse(claimId, out var usuarioAutenticadoId) && usuarioAutenticadoId == id;
+        if (!int.TryParse(claimId, out var usuarioAutenticadoId) || usuarioAutenticadoId != id)
+        {
+            throw new UnauthorizedAccessException("No tienes permiso para acceder o modificar este recurso.");
+        }
     }
 
     [HttpPost]
@@ -33,15 +36,8 @@ public class UsuariosController : ControllerBase
         [FromBody] RegistrarUsuarioCommand command,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var usuarioCreado = await _mediator.SendAsync<RegistrarUsuarioCommand, UsuarioDTO>(command, cancellationToken);
-            return CreatedAtAction(nameof(ObtenerPorId), new { id = usuarioCreado.Id }, usuarioCreado);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var usuarioCreado = await _mediator.SendAsync<RegistrarUsuarioCommand, UsuarioDTO>(command, cancellationToken);
+        return CreatedAtAction(nameof(ObtenerPorId), new { id = usuarioCreado.Id }, usuarioCreado);
     }
 
     [HttpPost("login")]
@@ -52,15 +48,8 @@ public class UsuariosController : ControllerBase
         [FromBody] IniciarSesionCommand command,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var respuesta = await _mediator.SendAsync<IniciarSesionCommand, LoginRespuestaDTO>(command, cancellationToken);
-            return Ok(respuesta);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var respuesta = await _mediator.SendAsync<IniciarSesionCommand, LoginRespuestaDTO>(command, cancellationToken);
+        return Ok(respuesta);
     }
 
     [Authorize]
@@ -74,21 +63,9 @@ public class UsuariosController : ControllerBase
         [FromRoute] int id,
         CancellationToken cancellationToken)
     {
-        if (!EsUsuarioAutorizado(id))
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, new { error = "No tienes permiso para acceder a esta información." });
-        }
-
-        try
-        {
-            var query = new ObtenerUsuarioPorIdQuery(id);
-            var resultado = await _mediator.SendAsync<ObtenerUsuarioPorIdQuery, UsuarioDTO>(query, cancellationToken);
-            return Ok(resultado);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
+        var query = new ObtenerUsuarioPorIdQuery(id);
+        var resultado = await _mediator.SendAsync<ObtenerUsuarioPorIdQuery, UsuarioDTO>(query, cancellationToken);
+        return Ok(resultado);
     }
 
     [Authorize]
@@ -104,25 +81,11 @@ public class UsuariosController : ControllerBase
         [FromBody] CambiarEmailDTO dto,
         CancellationToken cancellationToken)
     {
-        if (!EsUsuarioAutorizado(id))
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, new { error = "No tienes permiso para modificar este recurso." });
-        }
+        ValidarAutorizacionUsuario(id);
 
-        try
-        {
-            var command = new CambiarEmailCommand(id, dto.NuevoEmail);
-            var resultado = await _mediator.SendAsync<CambiarEmailCommand, UsuarioDTO>(command, cancellationToken);
-            return Ok(resultado);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var command = new CambiarEmailCommand(id, dto.NuevoEmail);
+        var resultado = await _mediator.SendAsync<CambiarEmailCommand, UsuarioDTO>(command, cancellationToken);
+        return Ok(resultado);
     }
 
     [Authorize]
@@ -138,24 +101,13 @@ public class UsuariosController : ControllerBase
         [FromBody] CambiarPasswordDTO dto,
         CancellationToken cancellationToken)
     {
-        if (!EsUsuarioAutorizado(id))
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, new { error = "No tienes permiso para modificar este recurso." });
-        }
+        ValidarAutorizacionUsuario(id);
 
-        try
-        {
-            var command = new CambiarPasswordCommand(id, dto.PasswordActual, dto.NuevaPassword);
-            await _mediator.SendAsync<CambiarPasswordCommand, bool>(command, cancellationToken);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var command = new CambiarPasswordCommand(id, dto.PasswordActual, dto.NuevaPassword);
+        await _mediator.SendAsync<CambiarPasswordCommand, bool>(command, cancellationToken);
+        return NoContent();
     }
+
+
+
 }

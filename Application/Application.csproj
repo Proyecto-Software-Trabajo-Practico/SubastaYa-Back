@@ -14,7 +14,6 @@
     <Folder Include="UseCases\Categorias\Commands\" />
     <Folder Include="UseCases\Categorias\Handlers\" />
     <Folder Include="UseCases\Categorias\Queries\" />
-    <Folder Include="UseCases\Auditoria\" />
     <Folder Include="UseCases\Puja\" />
     <Folder Include="UseCases\Transacciones\Commands\" />
     <Folder Include="UseCases\Transacciones\Handlers\" />
