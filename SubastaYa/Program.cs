@@ -15,6 +15,7 @@ using Application.UseCases.Transacciones.Queries;
 using Application.UseCases.Usuarios.Commands;
 using Application.UseCases.Usuarios.Handlers;
 using Application.UseCases.Usuarios.Queries;
+using Application.UseCases.Subastas.Commands;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Persistence;
@@ -122,6 +123,8 @@ builder.Services.AddScoped<IRequestHandler<ObtenerHistorialTransaccionesQuery, L
 builder.Services.AddScoped<IRequestHandler<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>, ObtenerDetalleSubastaQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriasQuery, IEnumerable<AuditoriaDTO>>, ObtenerAuditoriasQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriaPorEntidadQuery, IEnumerable<AuditoriaDTO>>, ObtenerAuditoriaPorEntidadQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerSubastasQuery, List<SubastaCardDTO>>, ObtenerSubastasQueryHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
 
