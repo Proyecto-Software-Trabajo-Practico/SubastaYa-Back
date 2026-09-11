@@ -120,6 +120,7 @@ builder.Services.AddScoped<IRequestHandler<CambiarPasswordCommand, bool>, Cambia
 builder.Services.AddScoped<IRequestHandler<ObtenerHistorialTransaccionesQuery, List<TransaccionLedgerDTO>?>, ObtenerHistorialTransaccionesQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>, ObtenerDetalleSubastaQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerSubastasQuery, List<SubastaCardDTO>>, ObtenerSubastasQueryHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
 

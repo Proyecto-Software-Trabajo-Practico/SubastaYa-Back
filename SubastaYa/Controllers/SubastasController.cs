@@ -35,11 +35,9 @@ public class SubastasController : ControllerBase
 
         return Ok(subasta);
     }
-    /*
-    Ruta: POST /api/subastas
-    Permite a un vendedor autenticado publicar una nueva subasta.
-    Retorna 201 Created con la cabecera Location apuntando a GET /api/subastas/{id}.
-    */
+    
+    //Permite a un vendedor autenticado publicar una nueva subasta.
+    
     [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -60,5 +58,25 @@ public class SubastasController : ControllerBase
         var subastaId = await _mediator.SendAsync<CrearSubastaCommand, int>(command, cancellationToken);
 
         return CreatedAtAction(nameof(ObtenerDetalle), new { id = subastaId }, new { id = subastaId });
+    }
+    
+     //Permite consultar el catálogo público de subastas con filtros opcionales (estado, categoría) y ordenamiento dinámico.
+    
+    [HttpGet]
+    [ProducesResponseType(typeof(List<SubastaCardDTO>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ObtenerSubastas(
+        [FromQuery] string? estado,
+        [FromQuery] int? categoriaId,
+        [FromQuery] string? orden,
+        CancellationToken cancellationToken)
+    {
+        var query = new ObtenerSubastasQuery(estado, categoriaId, orden);
+
+        var subastas = await _mediator.SendAsync<ObtenerSubastasQuery, List<SubastaCardDTO>>(
+            query,
+            cancellationToken
+        );
+
+        return Ok(subastas);
     }
 }

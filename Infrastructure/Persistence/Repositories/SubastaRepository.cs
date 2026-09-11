@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -70,6 +70,54 @@ public class SubastaRepository : ISubastaRepository
             .Include(s => s.Pujas)
             .Where(s => s.Estado == "ACTIVA" && s.FechaFin <= ahora)
             .ToListAsync();
+    }
+
+    /*
+     Búsqueda dinámica para el catálogo de subastas.
+     Aplica filtros opcionales por estado y categoría, carga ansiosa de categoría y pujas,
+     y ordena según el criterio solicitado sin rastreo de EF Core (.AsNoTracking).
+    */
+    public async Task<IReadOnlyList<Subasta>> GetFiltradasAsync(
+        string? estado, 
+        int? categoriaId, 
+        string? orden, 
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Subastas
+            .AsNoTracking()
+            .Include(s => s.Categoria)
+            .Include(s => s.Pujas)
+            .AsQueryable();
+
+        // 1. Filtro opcional por Estado (ej: "ACTIVA", "PROGRAMADA", "FINALIZADA")
+        if (!string.IsNullOrWhiteSpace(estado))
+        {
+            var estadoNormalizado = estado.Trim().ToUpperInvariant();
+            query = query.Where(s => s.Estado == estadoNormalizado);
+        }
+
+        // 2. Filtro opcional por Categoría
+        if (categoriaId.HasValue && categoriaId.Value > 0)
+        {
+            query = query.Where(s => s.CategoriaId == categoriaId.Value);
+        }
+
+        // 3. Criterios de ordenamiento
+        var ordenNormalizado = orden?.Trim().ToLowerInvariant();
+        query = ordenNormalizado switch
+        {
+            "tiempo" => query.OrderBy(s => s.FechaFin),
+            "precio_asc" => query.OrderBy(s => s.Pujas.Max(p => (decimal?)p.Monto) ?? s.PrecioBase),
+            "precio_desc" => query.OrderByDescending(s => s.Pujas.Max(p => (decimal?)p.Monto) ?? s.PrecioBase),
+            _ => string.IsNullOrWhiteSpace(estado)
+                // Orden por defecto cuando no se filtra por estado: 1. ACTIVAS, 2. PROGRAMADAS, 3. FINALIZADAS
+                ? query.OrderBy(s => s.Estado == "ACTIVA" ? 1 : (s.Estado == "PROGRAMADA" ? 2 : 3))
+                       .ThenBy(s => s.FechaFin)
+                // Orden por defecto cuando ya hay un estado seleccionado: menor tiempo restante
+                : query.OrderBy(s => s.FechaFin)
+        };
+
+        return await query.ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Subasta subasta)
