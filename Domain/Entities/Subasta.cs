@@ -83,4 +83,32 @@ public class Subasta : BaseEntity
     }
 
     public void IncrementarVersion() => Version++;
+
+    /*
+     * Regla de Negocio Anti-Sniping (Soft Close / Prórroga Dinámica):
+     * Si una puja ingresa dentro de los últimos 60 segundos antes de la finalización
+     * de una subasta activa, se prorroga la fecha de cierre sumándole 2 minutos adicionales.
+     * 
+     * Retorna true si se aplicó la extensión; false en caso contrario.
+     * El parámetro 'fechaReferencia' es opcional (por defecto usa DateTime.UtcNow), lo cual
+     * permite desacoplar el método del reloj del sistema para escribir pruebas unitarias determinísticas.
+     */
+    public bool EvaluarExtensionAntiSniping(DateTime? fechaReferencia = null)
+    {
+        // Regla de salvaguarda: Solo se evalúa sobre subastas actualmente en curso
+        if (Estado != "ACTIVA")
+            return false;
+
+        var ahora = fechaReferencia ?? DateTime.UtcNow;
+        var tiempoRestante = FechaFin - ahora;
+
+        // Si la subasta aún no concluyó y falta 1 minuto (60 segundos) o menos
+        if (tiempoRestante > TimeSpan.Zero && tiempoRestante <= TimeSpan.FromSeconds(60))
+        {
+            FechaFin = FechaFin.AddMinutes(2);
+            return true;
+        }
+
+        return false;
+    }
 }
