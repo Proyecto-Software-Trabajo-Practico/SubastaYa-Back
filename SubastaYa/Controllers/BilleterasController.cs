@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+using Application.DTOs;
 using Application.Interfaces;
 using Application.UseCases.Billeteras.Commands;
 using Application.UseCases.Billeteras.Queries;
@@ -53,12 +53,16 @@ public class BilleterasController : ControllerBase
     }
     
     [HttpGet("{usuarioId:int}/transacciones")]
+    [ProducesResponseType(typeof(ResultadoPaginadoDTO<TransaccionLedgerDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ObtenerHistorialTransacciones(
         int usuarioId,
-        CancellationToken cancellationToken)
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 10,
+        CancellationToken cancellationToken = default)
     {
-        var transacciones = await _mediator.SendAsync<ObtenerHistorialTransaccionesQuery, List<TransaccionLedgerDTO>?>(
-            new ObtenerHistorialTransaccionesQuery(usuarioId),
+        var transacciones = await _mediator.SendAsync<ObtenerHistorialTransaccionesQuery, ResultadoPaginadoDTO<TransaccionLedgerDTO>?>(
+            new ObtenerHistorialTransaccionesQuery(usuarioId, pagina, tamanoPagina),
             cancellationToken
         );
 

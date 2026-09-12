@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+using Application.DTOs;
 using Application.Interfaces;
 using Application.UseCases.Subastas.Queries;
 using Application.UseCases.Subastas.Commands;
@@ -63,20 +63,37 @@ public class SubastasController : ControllerBase
      //Permite consultar el catálogo público de subastas con filtros opcionales (estado, categoría) y ordenamiento dinámico.
     
     [HttpGet]
-    [ProducesResponseType(typeof(List<SubastaCardDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResultadoPaginadoDTO<SubastaCardDTO>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ObtenerSubastas(
         [FromQuery] string? estado,
         [FromQuery] int? categoriaId,
         [FromQuery] string? orden,
-        CancellationToken cancellationToken)
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 10,
+        CancellationToken cancellationToken = default)
     {
-        var query = new ObtenerSubastasQuery(estado, categoriaId, orden);
+        var query = new ObtenerSubastasQuery(estado, categoriaId, orden, pagina, tamanoPagina);
 
-        var subastas = await _mediator.SendAsync<ObtenerSubastasQuery, List<SubastaCardDTO>>(
+        var subastas = await _mediator.SendAsync<ObtenerSubastasQuery, ResultadoPaginadoDTO<SubastaCardDTO>>(
             query,
             cancellationToken
         );
 
         return Ok(subastas);
+    }
+
+    // Dispara manualmente el procesamiento y liquidación contable de subastas vencidas.
+    [HttpPost("procesar-finalizadas")]
+    [ProducesResponseType(typeof(SubastasProcesadasDTO), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ProcesarFinalizadas(CancellationToken cancellationToken)
+    {
+        var command = new ProcesarSubastasFinalizadasCommand();
+
+        var resultado = await _mediator.SendAsync<ProcesarSubastasFinalizadasCommand, SubastasProcesadasDTO>(
+            command,
+            cancellationToken
+        );
+
+        return Ok(resultado);
     }
 }

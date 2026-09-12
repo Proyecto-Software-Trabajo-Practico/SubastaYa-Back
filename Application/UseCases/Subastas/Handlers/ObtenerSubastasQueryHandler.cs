@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,11 +11,11 @@ using Application.UseCases.Subastas.Queries;
 namespace Application.UseCases.Subastas.Handlers;
 
 /*
- Handler responsable de atender la consulta del catálogo de subastas.
- Invoca al repositorio con los filtros correspondientes y proyecta 
- las entidades resultantes a SubastaCardDTO.
-*/
-public class ObtenerSubastasQueryHandler : IRequestHandler<ObtenerSubastasQuery, List<SubastaCardDTO>>
+ * Handler responsable de atender la consulta paginada del catálogo de subastas.
+ * Invoca al repositorio con filtros y paginación a nivel SQL Server, y proyecta 
+ * las entidades resultantes a SubastaCardDTO encapsuladas en ResultadoPaginadoDTO.
+ */
+public class ObtenerSubastasQueryHandler : IRequestHandler<ObtenerSubastasQuery, ResultadoPaginadoDTO<SubastaCardDTO>>
 {
     private readonly ISubastaRepository _subastaRepository;
 
@@ -24,18 +24,20 @@ public class ObtenerSubastasQueryHandler : IRequestHandler<ObtenerSubastasQuery,
         _subastaRepository = subastaRepository;
     }
 
-    public async Task<List<SubastaCardDTO>> HandleAsync(ObtenerSubastasQuery request, CancellationToken cancellationToken = default)
+    public async Task<ResultadoPaginadoDTO<SubastaCardDTO>> HandleAsync(ObtenerSubastasQuery request, CancellationToken cancellationToken = default)
     {
-        // 1. Obtener subastas filtradas y ordenadas desde el repositorio (Infrastructure)
-        var subastas = await _subastaRepository.GetFiltradasAsync(
+        // 1. Obtener subastas paginadas y conteo total desde el repositorio (Infrastructure)
+        var (subastas, totalItems) = await _subastaRepository.GetFiltradasAsync(
             request.Estado,
             request.CategoriaId,
             request.Orden,
+            request.Pagina,
+            request.TamanoPagina,
             cancellationToken
         );
 
         // 2. Proyectar entidades de dominio a SubastaCardDTO para la vista
-        return subastas.Select(s => new SubastaCardDTO(
+        var itemsDto = subastas.Select(s => new SubastaCardDTO(
             s.Id,
             s.Titulo,
             s.UrlImagen,
@@ -48,5 +50,17 @@ public class ObtenerSubastasQueryHandler : IRequestHandler<ObtenerSubastasQuery,
             s.CategoriaId,
             s.Categoria?.Nombre ?? "Sin categoría"
         )).ToList();
+
+        // 3. Calcular el total de páginas necesarias
+        var totalPaginas = (int)Math.Ceiling((double)totalItems / request.TamanoPagina);
+
+        // 4. Retornar el contenedor enriquecido con datos y metadatos de navegación
+        return new ResultadoPaginadoDTO<SubastaCardDTO>(
+            Items: itemsDto,
+            TotalItems: totalItems,
+            Pagina: request.Pagina,
+            TamanoPagina: request.TamanoPagina,
+            TotalPaginas: totalPaginas
+        );
     }
 }

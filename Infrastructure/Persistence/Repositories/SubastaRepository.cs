@@ -77,10 +77,12 @@ public class SubastaRepository : ISubastaRepository
      Aplica filtros opcionales por estado y categoría, carga ansiosa de categoría y pujas,
      y ordena según el criterio solicitado sin rastreo de EF Core (.AsNoTracking).
     */
-    public async Task<IReadOnlyList<Subasta>> GetFiltradasAsync(
+    public async Task<(IReadOnlyList<Subasta> Items, int TotalItems)> GetFiltradasAsync(
         string? estado, 
         int? categoriaId, 
         string? orden, 
+        int pagina,
+        int tamanoPagina,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Subastas
@@ -117,7 +119,33 @@ public class SubastaRepository : ISubastaRepository
                 : query.OrderBy(s => s.FechaFin)
         };
 
-        return await query.ToListAsync(cancellationToken);
+        // 4. Conteo total de elementos que cumplen los filtros (SELECT COUNT(*) en SQL)
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        // 5. Normalización defensiva de paginación
+        int paginaSegura = pagina;
+        if (paginaSegura < 1)
+        {
+            paginaSegura = 1;
+        }
+
+        int tamanoSeguro = tamanoPagina;
+        if (tamanoSeguro <= 0)
+        {
+            tamanoSeguro = 10;
+        }
+        else if (tamanoSeguro > 25)
+        {
+            tamanoSeguro = 25;
+        }
+
+        // 6. Paginación delegada a nivel motor SQL (OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY)
+        var items = await query
+            .Skip((paginaSegura - 1) * tamanoSeguro)
+            .Take(tamanoSeguro)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
     }
 
     public async Task AddAsync(Subasta subasta)
