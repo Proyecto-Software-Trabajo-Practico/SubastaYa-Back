@@ -67,12 +67,13 @@ public class SubastasController : ControllerBase
     public async Task<IActionResult> ObtenerSubastas(
         [FromQuery] string? estado,
         [FromQuery] int? categoriaId,
+        [FromQuery] int? vendedorId,
         [FromQuery] string? orden,
         [FromQuery] int pagina = 1,
         [FromQuery] int tamanoPagina = 10,
         CancellationToken cancellationToken = default)
     {
-        var query = new ObtenerSubastasQuery(estado, categoriaId, orden, pagina, tamanoPagina);
+        var query = new ObtenerSubastasQuery(estado, categoriaId, vendedorId, orden, pagina, tamanoPagina);
 
         var subastas = await _mediator.SendAsync<ObtenerSubastasQuery, ResultadoPaginadoDTO<SubastaCardDTO>>(
             query,

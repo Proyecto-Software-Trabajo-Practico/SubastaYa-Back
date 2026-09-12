@@ -64,6 +64,28 @@ public class ProcesarSubastasFinalizadasCommandHandler : IRequestHandler<Procesa
             {
                 subasta.MarcarDesierta();
                 declaradasDesiertas++;
+
+                // Registro inmutable de Auditoría por pase a DESIERTA (Requerimiento 2.4)
+                var detalleAuditoriaDesierta = JsonSerializer.Serialize(new
+                {
+                    SubastaId = subasta.Id,
+                    SubastaTitulo = subasta.Titulo,
+                    VendedorId = subasta.VendedorId,
+                    PrecioBase = subasta.PrecioBase,
+                    FechaCierre = DateTime.UtcNow,
+                    Motivo = "Expiró sin registrar ofertas"
+                });
+
+                var logAuditoriaDesierta = new Auditoria(
+                    entidad: "SUBASTA",
+                    entidadId: subasta.Id,
+                    accion: "SUBASTA_DESIERTA",
+                    usuarioId: subasta.VendedorId,
+                    detalleJson: detalleAuditoriaDesierta
+                );
+
+                await _auditoriaRepository.AddAsync(logAuditoriaDesierta);
+
                 continue;
             }
 
