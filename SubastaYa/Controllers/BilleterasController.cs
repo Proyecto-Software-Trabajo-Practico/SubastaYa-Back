@@ -20,7 +20,7 @@ public class BilleterasController : ControllerBase
     }
 
    
-    /// Ruta: GET /api/billeteras/{usuarioId}/saldos
+    // Ruta: GET /api/billeteras/{usuarioId}/saldos
     
     [HttpGet("{usuarioId:int}/saldos")]
     public async Task<IActionResult> ObtenerSaldos(int usuarioId, CancellationToken cancellationToken)

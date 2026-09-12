@@ -10,7 +10,7 @@ using Application.UseCases.Subastas.Queries;
 
 namespace Application.UseCases.Subastas.Handlers;
 
-/// Manejador CQRS encargado de obtener los detalles de una subasta y proyectarlos al DTO de la sala.
+// Manejador CQRS encargado de obtener los detalles de una subasta y proyectarlos al DTO de la sala.
 public class ObtenerDetalleSubastaQueryHandler : IRequestHandler<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>
 {
     private readonly ISubastaRepository _subastaRepository;

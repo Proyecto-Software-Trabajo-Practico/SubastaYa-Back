@@ -80,6 +80,7 @@ public class SubastaRepository : ISubastaRepository
     public async Task<(IReadOnlyList<Subasta> Items, int TotalItems)> GetFiltradasAsync(
         string? estado, 
         int? categoriaId, 
+        int? vendedorId,
         string? orden, 
         int pagina,
         int tamanoPagina,
@@ -102,6 +103,12 @@ public class SubastaRepository : ISubastaRepository
         if (categoriaId.HasValue && categoriaId.Value > 0)
         {
             query = query.Where(s => s.CategoriaId == categoriaId.Value);
+        }
+
+        // 3. Filtro opcional por Vendedor (para soportar "Mis Publicaciones")
+        if (vendedorId.HasValue && vendedorId.Value > 0)
+        {
+            query = query.Where(s => s.VendedorId == vendedorId.Value);
         }
 
         // 3. Criterios de ordenamiento

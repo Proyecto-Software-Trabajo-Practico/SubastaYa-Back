@@ -30,6 +30,7 @@ public class ObtenerSubastasQueryHandler : IRequestHandler<ObtenerSubastasQuery,
         var (subastas, totalItems) = await _subastaRepository.GetFiltradasAsync(
             request.Estado,
             request.CategoriaId,
+            request.VendedorId,
             request.Orden,
             request.Pagina,
             request.TamanoPagina,
