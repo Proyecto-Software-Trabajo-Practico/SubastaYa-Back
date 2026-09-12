@@ -119,12 +119,11 @@ builder.Services.AddScoped<IRequestHandler<IniciarSesionCommand, LoginRespuestaD
 builder.Services.AddScoped<IRequestHandler<ObtenerUsuarioPorIdQuery, UsuarioDTO>, ObtenerUsuarioPorIdQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CambiarEmailCommand, UsuarioDTO>, CambiarEmailCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<CambiarPasswordCommand, bool>, CambiarPasswordCommandHandler>();
-builder.Services.AddScoped<IRequestHandler<ObtenerHistorialTransaccionesQuery, List<TransaccionLedgerDTO>?>, ObtenerHistorialTransaccionesQueryHandler>();
-builder.Services.AddScoped<IRequestHandler<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>, ObtenerDetalleSubastaQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerHistorialTransaccionesQuery, ResultadoPaginadoDTO<TransaccionLedgerDTO>?>, ObtenerHistorialTransaccionesQueryHandler>(); builder.Services.AddScoped<IRequestHandler<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>, ObtenerDetalleSubastaQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriasQuery, IEnumerable<AuditoriaDTO>>, ObtenerAuditoriasQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriaPorEntidadQuery, IEnumerable<AuditoriaDTO>>, ObtenerAuditoriaPorEntidadQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
-builder.Services.AddScoped<IRequestHandler<ObtenerSubastasQuery, List<SubastaCardDTO>>, ObtenerSubastasQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerSubastasQuery, ResultadoPaginadoDTO<SubastaCardDTO>>, ObtenerSubastasQueryHandler>(); builder.Services.AddScoped<IRequestHandler<ProcesarSubastasFinalizadasCommand, SubastasProcesadasDTO>, ProcesarSubastasFinalizadasCommandHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
 

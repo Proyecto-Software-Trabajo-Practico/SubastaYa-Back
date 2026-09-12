@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,13 +26,44 @@ public class TransaccionLedgerRepository : ITransaccionLedgerRepository
     }
 
     // Historial de movimientos de una billetera (para mostrar en el panel del usuario)
-    public async Task<IReadOnlyList<TransaccionLedger>> GetByBilleteraIdAsync(int billeteraId)
+    public async Task<(IReadOnlyList<TransaccionLedger> Items, int TotalItems)> GetByBilleteraIdAsync(
+        int billeteraId, 
+        int pagina, 
+        int tamanoPagina, 
+        CancellationToken cancellationToken = default)
     {
-        return await _context.TransaccionesLedger
+        var query = _context.TransaccionesLedger
             .AsNoTracking() // Solo lectura para el historial
             .Where(t => t.BilleteraId == billeteraId)
-            .OrderByDescending(t => t.Fecha) // Los más recientes primero
-            .ToListAsync();
+            .OrderByDescending(t => t.Fecha); // Los más recientes primero
+
+        // 1. Conteo total de transacciones de la billetera en SQL Server
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        // 2. Normalización defensiva de paginación tradicional
+        int paginaSegura = pagina;
+        if (paginaSegura < 1)
+        {
+            paginaSegura = 1;
+        }
+
+        int tamanoSeguro = tamanoPagina;
+        if (tamanoSeguro <= 0)
+        {
+            tamanoSeguro = 10;
+        }
+        else if (tamanoSeguro > 25)
+        {
+            tamanoSeguro = 25;
+        }
+
+        // 3. Paginación delegada a nivel motor SQL Server (OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY)
+        var items = await query
+            .Skip((paginaSegura - 1) * tamanoSeguro)
+            .Take(tamanoSeguro)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
     }
 
     // Movimientos contables vinculados a una subasta específica (para auditoría)
