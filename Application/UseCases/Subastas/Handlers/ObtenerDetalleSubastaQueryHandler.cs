@@ -40,15 +40,15 @@ public class ObtenerDetalleSubastaQueryHandler : IRequestHandler<ObtenerDetalleS
 
         // 3. Proyectamos las pujas ordenadas de la más reciente a la más antigua
         var ultimasPujasDto = subasta.Pujas
-            .OrderByDescending(p => p.FechaPuja)
-            .Select(p => new PujaDTO(
-                p.Id,
-                p.Monto,
-                p.FechaPuja,
-                p.CompradorId,
-                p.Comprador?.Nombre ?? "Anónimo"
-            ))
-            .ToList();
+        .OrderByDescending(p => p.FechaPuja)
+        .Select(p => new PujaDTO(
+        Id: p.Id,
+        SubastaId: p.SubastaId,
+        CompradorId: p.CompradorId,
+        Monto: p.Monto,
+        FechaPuja: p.FechaPuja
+        ))
+        .ToList();
 
         // 4. Proyectamos y retornamos el DTO de detalle completo
         return new SubastaDetalleDTO(

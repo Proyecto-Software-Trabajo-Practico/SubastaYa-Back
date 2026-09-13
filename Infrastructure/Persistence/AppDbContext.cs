@@ -93,6 +93,9 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
             entity.Property(e => e.Monto).HasColumnType("decimal(18,2)");
             entity.Property(e => e.FechaPuja).HasDefaultValueSql("GETUTCDATE()");
 
+            entity.Property(e => e.RowVersion)
+                  .IsRowVersion();
+
             entity.HasOne(e => e.Subasta)
                   .WithMany(s => s.Pujas)
                   .HasForeignKey(e => e.SubastaId)

@@ -1,4 +1,5 @@
 using Application.DTOs;
+using Application.Hubs;
 using Application.Interfaces;
 using Application.Mediators;
 using Application.UseCases.Auditorias.Handlers;
@@ -8,6 +9,9 @@ using Application.UseCases.Billeteras.Handlers;
 using Application.UseCases.Billeteras.Queries;
 using Application.UseCases.Categorias.Handlers;
 using Application.UseCases.Categorias.Queries;
+using Application.UseCases.Pujas.Commands;
+using Application.UseCases.Pujas.Handlers;
+using Application.UseCases.Subastas.Commands;
 using Application.UseCases.Subastas.Handlers;
 using Application.UseCases.Subastas.Queries;
 using Application.UseCases.Transacciones.Handlers;
@@ -15,7 +19,6 @@ using Application.UseCases.Transacciones.Queries;
 using Application.UseCases.Usuarios.Commands;
 using Application.UseCases.Usuarios.Handlers;
 using Application.UseCases.Usuarios.Queries;
-using Application.UseCases.Subastas.Commands;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Persistence;
@@ -125,13 +128,18 @@ builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriasQuery, IEnumerable<A
 builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriaPorEntidadQuery, IEnumerable<AuditoriaDTO>>, ObtenerAuditoriaPorEntidadQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerSubastasQuery, List<SubastaCardDTO>>, ObtenerSubastasQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<CrearPujaCommand, PujaDTO>,
+    CrearPujaCommandHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
+// Registrar SignalR
+builder.Services.AddSignalR();
 
 // Controllers
 builder.Services.AddControllers();
 
 var app = builder.Build();
+app.MapHub<SubastaHub>("/hubs/subastas");
 
 app.UseMiddleware<ExceptionMiddleware>();
 

@@ -14,13 +14,13 @@
     <Folder Include="UseCases\Categorias\Commands\" />
     <Folder Include="UseCases\Categorias\Handlers\" />
     <Folder Include="UseCases\Categorias\Queries\" />
-    <Folder Include="UseCases\Puja\" />
     <Folder Include="UseCases\Transacciones\Commands\" />
     <Folder Include="UseCases\Transacciones\Handlers\" />
     <Folder Include="UseCases\Transacciones\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
