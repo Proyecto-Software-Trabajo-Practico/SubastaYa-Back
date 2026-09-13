@@ -82,6 +82,30 @@ public class Subasta : BaseEntity
         Estado = "ACTIVA";
     }
 
+    /*
+     * Transiciona la subasta al estado FINALIZADA al completarse el tiempo de vigencia
+     * habiendo registrado al menos una oferta válida.
+     */
+    public void Finalizar()
+    {
+        if (Estado != "ACTIVA")
+            throw new DomainException("Solo se pueden finalizar subastas que se encuentren en estado ACTIVA.");
+
+        Estado = "FINALIZADA";
+    }
+
+    /*
+     * Transiciona la subasta al estado DESIERTA cuando expira su tiempo de vigencia
+     * sin haber recibido ninguna puja de los usuarios.
+     */
+    public void MarcarDesierta()
+    {
+        if (Estado != "ACTIVA")
+            throw new DomainException("Solo se pueden declarar desiertas subastas que se encuentren en estado ACTIVA.");
+
+        Estado = "DESIERTA";
+    }
+
     public void IncrementarVersion() => Version++;
 
     /*
