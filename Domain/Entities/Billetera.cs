@@ -9,14 +9,15 @@ public class Billetera : BaseEntity
 {
     public int UsuarioId { get; private set; }
     public virtual Usuario Usuario { get; private set; } = null!;
-    
+
     public decimal SaldoTotal { get; private set; }
     public decimal SaldoRetenido { get; private set; }
     public decimal SaldoDisponible { get; private set; }
 
     public virtual ICollection<TransaccionLedger> Transacciones { get; private set; } = new List<TransaccionLedger>();
 
-    public int Version { get; private set; }
+    // Control de concurrencia optimista (Optimistic Locking)
+    public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
     public Billetera(int usuarioId)
     {
@@ -26,7 +27,8 @@ public class Billetera : BaseEntity
         SaldoDisponible = 0m;
     }
 
-    private Billetera() { 
+    private Billetera()
+    {
     }
 
     public void Depositar(decimal monto)
@@ -46,11 +48,6 @@ public class Billetera : BaseEntity
         SaldoRetenido += monto;
     }
 
-    /*
-     * Descongela fondos previamente retenidos en concepto de garantía (Escrow).
-     * Se invoca cuando una puja es superada por un nuevo postor o ante la cancelación de una oferta.
-     * Restaura el monto a SaldoDisponible sin alterar SaldoTotal.
-     */
     public void LiberarSaldo(decimal monto)
     {
         if (monto <= 0)
@@ -63,11 +60,6 @@ public class Billetera : BaseEntity
         SaldoDisponible += monto;
     }
 
-    /*
-     * Debita definitivamente los fondos retenidos en concepto de garantía (Escrow).
-     * Se invoca durante la liquidación al consagrarse un ganador en la subasta.
-     * Descuenta el monto tanto de SaldoRetenido como de SaldoTotal.
-     */
     public void DebitarSaldoRetenido(decimal monto)
     {
         if (monto <= 0)
