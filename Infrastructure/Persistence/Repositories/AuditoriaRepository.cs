@@ -1,49 +1,98 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Infrastructure.Persistence.Repositories
+namespace Infrastructure.Persistence.Repositories;
+
+public class AuditoriaRepository : IAuditoriaRepository
 {
-    public class AuditoriaRepository : IAuditoriaRepository
+    private readonly AppDbContext _context;
+
+    public AuditoriaRepository(AppDbContext context)
     {
-        private readonly AppDbContext _context;
+        _context = context;
+    }
 
-        public AuditoriaRepository(AppDbContext context)
+    public async Task<Auditoria?> GetByIdAsync(int id)
+    {
+        return await _context.Auditorias.FindAsync(id);
+    }
+
+    public async Task<(IReadOnlyList<Auditoria> Items, int TotalItems)> GetPaginadasAsync(
+        int pagina,
+        int tamanoPagina,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Auditorias
+            .AsNoTracking()
+            .OrderByDescending(a => a.Fecha);
+
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        int paginaSegura = pagina;
+        if (paginaSegura < 1)
         {
-            _context = context;
+            paginaSegura = 1;
         }
 
-        public async Task<Auditoria?> GetByIdAsync(int id)
+        int tamanoSeguro = tamanoPagina;
+        if (tamanoSeguro <= 0)
         {
-            return await _context.Auditorias.FindAsync(id);
+            tamanoSeguro = 10;
+        }
+        else if (tamanoSeguro > 25)
+        {
+            tamanoSeguro = 25;
         }
 
-        public async Task<IEnumerable<Auditoria>> GetByEntidadAsync(string entidad, int entidadId)
+        var items = await query
+            .Skip((paginaSegura - 1) * tamanoSeguro)
+            .Take(tamanoSeguro)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
+    }
+
+    public async Task<(IReadOnlyList<Auditoria> Items, int TotalItems)> GetByEntidadPaginadasAsync(
+        string entidad,
+        int entidadId,
+        int pagina,
+        int tamanoPagina,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Auditorias
+            .AsNoTracking()
+            .Where(a => a.Entidad == entidad && a.EntidadId == entidadId)
+            .OrderByDescending(a => a.Fecha);
+
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        int paginaSegura = pagina;
+        if (paginaSegura < 1)
         {
-            return await _context.Auditorias
-                .AsNoTracking()
-                .Where(a => a.Entidad == entidad && a.EntidadId == entidadId)
-                .OrderByDescending(a => a.Fecha)
-                .ToListAsync();
+            paginaSegura = 1;
         }
 
-        public async Task<IEnumerable<Auditoria>> GetAllAsync()
+        int tamanoSeguro = tamanoPagina;
+        if (tamanoSeguro <= 0)
         {
-            return await _context.Auditorias
-                .AsNoTracking()
-                .Include(a => a.Usuario)
-                .OrderByDescending(a => a.Fecha)
-                .ToListAsync();
+            tamanoSeguro = 10;
+        }
+        else if (tamanoSeguro > 25)
+        {
+            tamanoSeguro = 25;
         }
 
-        public async Task AddAsync(Auditoria auditoria)
-        {
-            await _context.Auditorias.AddAsync(auditoria);
-        }
+        var items = await query
+            .Skip((paginaSegura - 1) * tamanoSeguro)
+            .Take(tamanoSeguro)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
+    }
+
+    public async Task AddAsync(Auditoria auditoria)
+    {
+        await _context.Auditorias.AddAsync(auditoria);
     }
 }

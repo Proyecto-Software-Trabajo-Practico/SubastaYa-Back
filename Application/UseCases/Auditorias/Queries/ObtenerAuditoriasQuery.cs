@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Application.UseCases.Auditorias.Queries;
 
-namespace Application.UseCases.Auditorias.Queries
-{
-    public record ObtenerAuditoriasQuery();
-}
+public record ObtenerAuditoriasQuery(
+    int Pagina = 1,
+    int TamanoPagina = 10
+);

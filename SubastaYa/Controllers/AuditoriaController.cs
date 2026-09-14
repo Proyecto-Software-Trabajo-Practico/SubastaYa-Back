@@ -19,27 +19,32 @@ public class AuditoriaController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<AuditoriaDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResultadoPaginadoDTO<AuditoriaDTO>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ObtenerTodas(CancellationToken cancellationToken)
+    public async Task<IActionResult> ObtenerTodas(
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 10,
+        CancellationToken cancellationToken = default)
     {
-        var query = new ObtenerAuditoriasQuery();
-        var resultado = await _mediator.SendAsync<ObtenerAuditoriasQuery, IEnumerable<AuditoriaDTO>>(query, cancellationToken);
+        var query = new ObtenerAuditoriasQuery(pagina, tamanoPagina);
+        var resultado = await _mediator.SendAsync<ObtenerAuditoriasQuery, ResultadoPaginadoDTO<AuditoriaDTO>>(query, cancellationToken);
         return Ok(resultado);
     }
 
     [HttpGet("{entidad}/{entidadId:int}")]
-    [ProducesResponseType(typeof(IEnumerable<AuditoriaDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResultadoPaginadoDTO<AuditoriaDTO>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ObtenerPorEntidad(
         [FromRoute] string entidad,
         [FromRoute] int entidadId,
-        CancellationToken cancellationToken)
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 10,
+        CancellationToken cancellationToken = default)
     {
-        var query = new ObtenerAuditoriaPorEntidadQuery(entidad, entidadId);
-        var resultado = await _mediator.SendAsync<ObtenerAuditoriaPorEntidadQuery, IEnumerable<AuditoriaDTO>>(query, cancellationToken);
+        var query = new ObtenerAuditoriaPorEntidadQuery(entidad, entidadId, pagina, tamanoPagina);
+        var resultado = await _mediator.SendAsync<ObtenerAuditoriaPorEntidadQuery, ResultadoPaginadoDTO<AuditoriaDTO>>(query, cancellationToken);
         return Ok(resultado);
     }
 }

@@ -4,7 +4,7 @@ using Application.UseCases.Auditorias.Queries;
 
 namespace Application.UseCases.Auditorias.Handlers;
 
-public class ObtenerAuditoriasQueryHandler : IRequestHandler<ObtenerAuditoriasQuery, IEnumerable<AuditoriaDTO>>
+public class ObtenerAuditoriasQueryHandler : IRequestHandler<ObtenerAuditoriasQuery, ResultadoPaginadoDTO<AuditoriaDTO>>
 {
     private readonly IAuditoriaRepository _auditoriaRepository;
 
@@ -13,11 +13,14 @@ public class ObtenerAuditoriasQueryHandler : IRequestHandler<ObtenerAuditoriasQu
         _auditoriaRepository = auditoriaRepository;
     }
 
-    public async Task<IEnumerable<AuditoriaDTO>> HandleAsync(ObtenerAuditoriasQuery request, CancellationToken cancellationToken = default)
+    public async Task<ResultadoPaginadoDTO<AuditoriaDTO>> HandleAsync(ObtenerAuditoriasQuery request, CancellationToken cancellationToken = default)
     {
-        var logs = await _auditoriaRepository.GetAllAsync();
+        var (entidades, totalItems) = await _auditoriaRepository.GetPaginadasAsync(
+            request.Pagina,
+            request.TamanoPagina,
+            cancellationToken);
 
-        return logs.Select(a => new AuditoriaDTO(
+        var itemsDto = entidades.Select(a => new AuditoriaDTO(
             a.Id,
             a.Entidad,
             a.EntidadId,
@@ -25,6 +28,16 @@ public class ObtenerAuditoriasQueryHandler : IRequestHandler<ObtenerAuditoriasQu
             a.UsuarioId,
             a.DetalleJson,
             a.Fecha
-        ));
+        )).ToList();
+
+        int totalPaginas = (int)Math.Ceiling((double)totalItems / request.TamanoPagina);
+
+        return new ResultadoPaginadoDTO<AuditoriaDTO>(
+            itemsDto,
+            totalItems,
+            request.Pagina,
+            request.TamanoPagina,
+            totalPaginas
+        );
     }
 }

@@ -18,6 +18,7 @@ using Application.UseCases.Transacciones.Handlers;
 using Application.UseCases.Transacciones.Queries;
 using Application.UseCases.Usuarios.Commands;
 using Application.UseCases.Usuarios.Handlers;
+using SubastaYa.Workers;
 using Application.UseCases.Usuarios.Queries;
 using Domain.Entities;
 using Infrastructure;
@@ -123,8 +124,8 @@ builder.Services.AddScoped<IRequestHandler<ObtenerUsuarioPorIdQuery, UsuarioDTO>
 builder.Services.AddScoped<IRequestHandler<CambiarEmailCommand, UsuarioDTO>, CambiarEmailCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<CambiarPasswordCommand, bool>, CambiarPasswordCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerHistorialTransaccionesQuery, ResultadoPaginadoDTO<TransaccionLedgerDTO>?>, ObtenerHistorialTransaccionesQueryHandler>(); builder.Services.AddScoped<IRequestHandler<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>, ObtenerDetalleSubastaQueryHandler>();
-builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriasQuery, IEnumerable<AuditoriaDTO>>, ObtenerAuditoriasQueryHandler>();
-builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriaPorEntidadQuery, IEnumerable<AuditoriaDTO>>, ObtenerAuditoriaPorEntidadQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriasQuery, ResultadoPaginadoDTO<AuditoriaDTO>>, ObtenerAuditoriasQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriaPorEntidadQuery, ResultadoPaginadoDTO<AuditoriaDTO>>, ObtenerAuditoriaPorEntidadQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerSubastasQuery, ResultadoPaginadoDTO<SubastaCardDTO>>, ObtenerSubastasQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CrearPujaCommand, PujaDTO>, CrearPujaCommandHandler>();
@@ -133,6 +134,8 @@ builder.Services.AddScoped<IRequestHandler<ProcesarSubastasFinalizadasCommand, S
 builder.Services.AddScoped<IMediator, Mediator>();
 // Registrar SignalR
 builder.Services.AddSignalR();
+// Registro del Background Worker para barrido periódico de subastas vencidas
+builder.Services.AddHostedService<SubastasVencidasWorker>();
 
 // Controllers
 builder.Services.AddControllers();

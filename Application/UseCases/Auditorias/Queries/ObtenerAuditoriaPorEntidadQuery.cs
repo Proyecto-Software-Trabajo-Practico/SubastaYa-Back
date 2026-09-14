@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Application.UseCases.Auditorias.Queries;
 
-namespace Application.UseCases.Auditorias.Queries
-{
-    public record ObtenerAuditoriaPorEntidadQuery(string Entidad, int EntidadId);
-}
+public record ObtenerAuditoriaPorEntidadQuery(
+    string Entidad,
+    int EntidadId,
+    int Pagina = 1,
+    int TamanoPagina = 10
+);

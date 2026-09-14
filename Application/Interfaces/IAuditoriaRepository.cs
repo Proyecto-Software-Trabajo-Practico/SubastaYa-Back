@@ -1,15 +1,11 @@
 ﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Interfaces;
+
 public interface IAuditoriaRepository
 {
     Task<Auditoria?> GetByIdAsync(int id);
-    Task<IEnumerable<Auditoria>> GetAllAsync();
-    Task<IEnumerable<Auditoria>> GetByEntidadAsync(string entidad, int entidadId);
+    Task<(IReadOnlyList<Auditoria> Items, int TotalItems)> GetPaginadasAsync(int pagina, int tamanoPagina, CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<Auditoria> Items, int TotalItems)> GetByEntidadPaginadasAsync(string entidad, int entidadId, int pagina, int tamanoPagina, CancellationToken cancellationToken = default);
     Task AddAsync(Auditoria auditoria);
 }
