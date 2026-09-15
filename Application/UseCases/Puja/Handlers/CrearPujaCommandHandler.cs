@@ -166,8 +166,6 @@ public class CrearPujaCommandHandler : IRequestHandler<CrearPujaCommand, PujaDTO
         // ETAPA 4: REGLA ANTI-SNIPING (DOMINIO)
         // ==========================================
 
-        // Delega a la entidad Subasta la evaluación: si resta menos de 60 segundos,
-        // suma 2 minutos adicionales a FechaFin y retorna true.
         bool huboAntiSniping = subasta.EvaluarExtensionAntiSniping();
         if (huboAntiSniping)
         {
@@ -177,7 +175,6 @@ public class CrearPujaCommandHandler : IRequestHandler<CrearPujaCommand, PujaDTO
                 NuevaFechaFin = subasta.FechaFin
             });
 
-            // Auditoría obligatoria exigida por el TP para la prórroga de tiempo
             await _auditoriaRepository.AddAsync(new Auditoria(
                 entidad: "SUBASTA",
                 entidadId: subasta.Id,
@@ -186,7 +183,11 @@ public class CrearPujaCommandHandler : IRequestHandler<CrearPujaCommand, PujaDTO
                 detalleJson: detalleAntiSniping
             ));
         }
-
+        else
+        {
+            // Forzar actualización de Subasta en EF Core para validar concurrencia en la subasta
+            _subastaRepository.Update(subasta); // O marcar como modificado en tu repositorio
+        }
 
         // ==========================================
         // ETAPA 5 Y 6: INSTANCIACIÓN Y AUDITORÍA

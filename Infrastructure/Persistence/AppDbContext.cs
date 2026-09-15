@@ -34,6 +34,14 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                 .HasDefaultValueSql("GETUTCDATE()");
         });
 
+        // CATEGORIA
+        modelBuilder.Entity<Categoria>(entity =>
+        {
+            entity.ToTable("Categorias");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
+        });
+
         // BILLETERA
         modelBuilder.Entity<Billetera>(entity =>
         {
@@ -44,20 +52,13 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
             entity.Property(e => e.SaldoRetenido).HasColumnType("decimal(18,2)");
             entity.Property(e => e.SaldoDisponible).HasColumnType("decimal(18,2)");
 
-            entity.Property(e => e.Version).IsConcurrencyToken();
+            // Mapeo a timestamp/rowversion nativo de SQL Server
+            entity.Property(e => e.RowVersion).IsRowVersion();
 
             entity.HasOne(e => e.Usuario)
                 .WithOne()
                 .HasForeignKey<Billetera>(b => b.UsuarioId)
                 .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        // CATEGORIA
-        modelBuilder.Entity<Categoria>(entity =>
-        {
-            entity.ToTable("Categorias");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
         });
 
         // SUBASTA
@@ -71,7 +72,8 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
             entity.Property(e => e.PrecioBase).HasColumnType("decimal(18,2)");
             entity.Property(e => e.IncrementoMinimo).HasColumnType("decimal(18,2)");
 
-            entity.Property(e => e.Version).IsConcurrencyToken();
+            // Mapeo a timestamp/rowversion nativo de SQL Server
+            entity.Property(e => e.RowVersion).IsRowVersion();
 
             entity.HasOne(e => e.Vendedor)
                   .WithMany()
