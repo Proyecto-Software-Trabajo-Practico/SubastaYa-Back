@@ -130,12 +130,15 @@ builder.Services.AddScoped<IRequestHandler<CrearSubastaCommand, int>, CrearSubas
 builder.Services.AddScoped<IRequestHandler<ObtenerSubastasQuery, ResultadoPaginadoDTO<SubastaCardDTO>>, ObtenerSubastasQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CrearPujaCommand, PujaDTO>, CrearPujaCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ProcesarSubastasFinalizadasCommand, SubastasProcesadasDTO>, ProcesarSubastasFinalizadasCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<ActivarSubastasIniciadasCommand, int>, ActivarSubastasIniciadasCommandHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
 // Registrar SignalR
 builder.Services.AddSignalR();
 // Registro del Background Worker para barrido periódico de subastas vencidas
 builder.Services.AddHostedService<SubastasVencidasWorker>();
+
+builder.Services.AddHostedService<SubastasIniciadasWorker>();
 
 // Controllers
 builder.Services.AddControllers();

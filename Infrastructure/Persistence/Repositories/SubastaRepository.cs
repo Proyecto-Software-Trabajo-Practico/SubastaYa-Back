@@ -72,6 +72,15 @@ public class SubastaRepository : ISubastaRepository
             .ToListAsync();
     }
 
+    // Rastreado por ChangeTracker: el Worker de inicio va a cambiarles el estado a ACTIVA
+    public async Task<IReadOnlyList<Subasta>> GetSubastasProgramadasParaInicioAsync()
+    {
+        var ahora = DateTime.UtcNow;
+        return await _context.Subastas
+            .Where(s => s.Estado == "PROGRAMADA" && s.FechaInicio <= ahora)
+            .ToListAsync();
+    }
+
     /*
      Búsqueda dinámica para el catálogo de subastas.
      Aplica filtros opcionales por estado y categoría, carga ansiosa de categoría y pujas,
