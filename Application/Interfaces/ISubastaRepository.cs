@@ -15,6 +15,7 @@ namespace Application.Interfaces
         Task<Subasta?> GetDetalleByIdAsync(int id);
         Task<IReadOnlyList<Subasta>> GetSubastasActivasAsync();
         Task<IReadOnlyList<Subasta>> GetSubastasVencidasParaCierreAsync();
+        Task<IReadOnlyList<Subasta>> GetSubastasProgramadasParaInicioAsync();
         // Búsqueda dinámica con filtros, ordenamiento y paginación para el catálogo
         Task<(IReadOnlyList<Subasta> Items, int TotalItems)> GetFiltradasAsync(string? estado, int? categoriaId, int? vendedorId, string? orden, int pagina, int tamanoPagina, CancellationToken cancellationToken = default);
         Task AddAsync(Subasta subasta);

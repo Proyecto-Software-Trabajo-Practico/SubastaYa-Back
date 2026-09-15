@@ -73,11 +73,19 @@ public class Subasta : BaseEntity
         Estado = null!;
     } // Para EF Core
 
-    // Regla de Negocio: Activar la subasta
-    public void Activar()
+    /*
+     * Transiciona la subasta al estado ACTIVA cuando se cumple su fecha de inicio programada.
+     * Invariante de Dominio: Solo se pueden activar subastas programadas cuya fecha de inicio
+     * ya haya sido alcanzada. Admite 'fechaReferencia' opcional para pruebas unitarias determinísticas.
+     */
+    public void Activar(DateTime? fechaReferencia = null)
     {
         if (Estado != "PROGRAMADA")
             throw new DomainException("Solo se pueden activar subastas programadas.");
+
+        var ahora = fechaReferencia ?? DateTime.UtcNow;
+        if (ahora < FechaInicio)
+            throw new DomainException("No es posible activar la subasta antes de su fecha de inicio programada.");
             
         Estado = "ACTIVA";
     }
