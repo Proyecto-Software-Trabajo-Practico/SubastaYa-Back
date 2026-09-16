@@ -72,7 +72,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials(); // Habilita la negociación HTTP inicial de SignalR con el frontend
     });
 });
 

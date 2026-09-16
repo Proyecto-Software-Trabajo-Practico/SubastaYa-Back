@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+using Application.DTOs;
 using Application.Hubs;
 using Application.Interfaces;
 using Application.UseCases.Pujas.Commands;
@@ -243,7 +243,9 @@ public class CrearPujaCommandHandler : IRequestHandler<CrearPujaCommand, PujaDTO
             await _hubContext.Clients.Group($"subasta-{subasta.Id}").SendAsync("NuevaPujaRecibida", new
             {
                 SubastaId = subasta.Id,
+                CompradorId = request.CompradorId,
                 Monto = nuevaPuja.Monto,
+                FechaPuja = nuevaPuja.FechaPuja,
                 Postor = postorAnonimizado,
                 NuevaFechaFin = subasta.FechaFin,
                 SeAplicoAntiSniping = huboAntiSniping
