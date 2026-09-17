@@ -164,6 +164,41 @@ public class SubastaRepository : ISubastaRepository
         return (items, totalItems);
     }
 
+    /*
+     * Consulta paginada de subastas creadas por un vendedor específico para el Módulo 5.
+     * Aplica .AsNoTracking() para optimizar memoria en lecturas puras.
+     * Carga ansiosa de Categoria y Pujas (con Comprador) para permitir el cálculo del adjudicatario y recaudación.
+     * Ordena por fecha de finalización descendente (más recientes primero).
+     */
+    public async Task<(IReadOnlyList<Subasta> Items, int TotalItems)> GetByVendedorPaginadoAsync(
+        int vendedorId,
+        int pagina,
+        int tamanoPagina,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Subastas
+            .AsNoTracking()
+            .Where(s => s.VendedorId == vendedorId)
+            .Include(s => s.Categoria)
+            .Include(s => s.Pujas)
+                .ThenInclude(p => p.Comprador)
+            .OrderByDescending(s => s.FechaFin)
+            .AsQueryable();
+
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        // Paginación defensiva ante parámetros fuera de rango
+        int paginaSegura = pagina < 1 ? 1 : pagina;
+        int tamanoSeguro = tamanoPagina <= 0 ? 10 : (tamanoPagina > 50 ? 50 : tamanoPagina);
+
+        var items = await query
+            .Skip((paginaSegura - 1) * tamanoSeguro)
+            .Take(tamanoSeguro)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
+    }
+
     public async Task AddAsync(Subasta subasta)
     {
         await _context.Subastas.AddAsync(subasta);

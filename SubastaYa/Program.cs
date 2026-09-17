@@ -129,6 +129,7 @@ builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriasQuery, ResultadoPagi
 builder.Services.AddScoped<IRequestHandler<ObtenerAuditoriaPorEntidadQuery, ResultadoPaginadoDTO<AuditoriaDTO>>, ObtenerAuditoriaPorEntidadQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CrearSubastaCommand, int>, CrearSubastaCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerSubastasQuery, ResultadoPaginadoDTO<SubastaCardDTO>>, ObtenerSubastasQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerSubastasPorUsuarioQuery, ResultadoPaginadoDTO<SubastaVendedorDTO>>, ObtenerSubastasPorUsuarioQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<CrearPujaCommand, PujaDTO>, CrearPujaCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ProcesarSubastasFinalizadasCommand, SubastasProcesadasDTO>, ProcesarSubastasFinalizadasCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ActivarSubastasIniciadasCommand, int>, ActivarSubastasIniciadasCommandHandler>();
