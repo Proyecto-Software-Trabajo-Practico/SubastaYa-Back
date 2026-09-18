@@ -31,18 +31,15 @@ public class CambiarEmailCommandHandler : IRequestHandler<CambiarEmailCommand, U
             throw new KeyNotFoundException($"El usuario con ID {request.UsuarioId} no existe.");
         }
 
-        // 1. Validar si el nuevo email ya está registrado por otro usuario
         var usuarioExistente = await _userManager.FindByEmailAsync(request.NuevoEmail);
         if (usuarioExistente != null && usuarioExistente.Id != usuario.Id)
         {
             throw new InvalidOperationException("El correo electrónico ya está registrado por otra cuenta.");
         }
 
-        // 2. Actualizar Email y UserName de forma coherente
         usuario.Email = request.NuevoEmail;
         usuario.UserName = request.NuevoEmail;
 
-        // 3. Crear el log de auditoría
         var detalle = JsonSerializer.Serialize(new { NuevoEmail = request.NuevoEmail });
         var logAuditoria = new Auditoria(
             entidad: "USUARIO",
@@ -54,7 +51,6 @@ public class CambiarEmailCommandHandler : IRequestHandler<CambiarEmailCommand, U
 
         await _auditoriaRepository.AddAsync(logAuditoria);
 
-        // 4. UpdateAsync de UserManager guarda las modificaciones del usuario
         var result = await _userManager.UpdateAsync(usuario);
         if (!result.Succeeded)
         {
@@ -62,7 +58,6 @@ public class CambiarEmailCommandHandler : IRequestHandler<CambiarEmailCommand, U
             throw new InvalidOperationException($"No se pudo actualizar el email: {errores}");
         }
 
-        // 5. Asegurar la persistencia del registro de auditoría
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new UsuarioDTO(usuario.Id, usuario.Nombre, usuario.Email, usuario.FechaRegistro);

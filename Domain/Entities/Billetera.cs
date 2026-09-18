@@ -16,11 +16,7 @@ public class Billetera : BaseEntity
 
     public virtual ICollection<TransaccionLedger> Transacciones { get; private set; } = new List<TransaccionLedger>();
 
-    /*
-     * Control de concurrencia optimista (Optimistic Locking) mapeado a rowversion nativo de SQL Server.
-     * Garantiza la integridad contable del saldo y de la garantía Escrow, impidiendo que dos débitos
-     * o retenciones simultáneas provoquen un saldo negativo o una actualización inconsistente.
-     */
+    
     public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
     public Billetera(int usuarioId)

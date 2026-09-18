@@ -12,7 +12,6 @@ namespace Application.UseCases.Pujas.Handlers;
 
 public class CrearPujaCommandHandler : IRequestHandler<CrearPujaCommand, PujaDTO>
 {
-    // Repositorios e interfaces de infraestructura inyectados mediante Inyección de Dependencias (DI)
     private readonly ISubastaRepository _subastaRepository;
     private readonly IPujaRepository _pujaRepository;
     private readonly IBilleteraRepository _billeteraRepository;
@@ -183,7 +182,7 @@ public class CrearPujaCommandHandler : IRequestHandler<CrearPujaCommand, PujaDTO
         else
         {
             // Forzar actualización de Subasta en EF Core para validar concurrencia en la subasta
-            _subastaRepository.Update(subasta); // O marcar como modificado en tu repositorio
+            _subastaRepository.Update(subasta); 
         }
 
         // ==========================================
@@ -215,21 +214,11 @@ public class CrearPujaCommandHandler : IRequestHandler<CrearPujaCommand, PujaDTO
         ));
 
 
-        // ==========================================
-        // ETAPA 7: PERSISTENCIA ATÓMICA Y CONCURRENCIA
-        // ==========================================
-
-        // Persiste TODOS los cambios de la transacción (Subasta, Billeteras, Ledger, Puja, Auditorías).
-        // Si dos peticiones compiten en el mismo milisegundo, EF Core detecta la diferencia en el 'RowVersion'
-        // (Optimistic Locking) y dispara DbUpdateConcurrencyException, que el Middleware mapea a HTTP 409 Conflict.
+        
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
 
-        // ==========================================
-        // ETAPA 8: NOTIFICACIÓN TIEMPO REAL (SIGNALR)
-        // ==========================================
-
-        // Anonimizamos el seudónimo del usuario para cumplir con la regla de UX (Módulo 3)
+        
         string postorAnonimizado = $"Usuario_{request.CompradorId}";
 
         // Envolvemos el envío por WebSockets en un try-catch táctico de resiliencia:
@@ -253,7 +242,6 @@ public class CrearPujaCommandHandler : IRequestHandler<CrearPujaCommand, PujaDTO
             // Log de infraestructura: Se omite la interrupción para asegurar la respuesta del Handler.
         }
 
-        // Devolvemos el DTO con el resultado exitoso
         return new PujaDTO(
             nuevaPuja.Id,
             nuevaPuja.SubastaId,

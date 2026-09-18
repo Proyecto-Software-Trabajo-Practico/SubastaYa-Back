@@ -17,7 +17,6 @@ namespace Application.Hubs
     {
         public async Task UnirseASubasta(string subastaId)
         {
-            // Se utiliza spinal-case (subasta-{id}) para coincidir exactamente con el canal de difusión del Handler
             await Groups.AddToGroupAsync(Context.ConnectionId, $"subasta-{subastaId}");
         }
 

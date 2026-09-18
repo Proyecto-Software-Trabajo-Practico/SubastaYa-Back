@@ -20,7 +20,6 @@ public class CategoriasController : ControllerBase
     [ProducesResponseType(typeof(List<CategoriaDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ObtenerTodas(CancellationToken cancellationToken)
     {
-        // Especificamos el tipo de Query y la respuesta esperada List<CategoriaDto>
         var resultado = await _mediator.SendAsync<ObtenerCategoriasQuery, List<CategoriaDto>>(
             new ObtenerCategoriasQuery(),
             cancellationToken

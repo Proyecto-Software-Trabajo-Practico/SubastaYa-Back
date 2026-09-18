@@ -10,7 +10,6 @@ using Application.UseCases.Subastas.Queries;
 
 namespace Application.UseCases.Subastas.Handlers;
 
-// Manejador CQRS encargado de obtener los detalles de una subasta y proyectarlos al DTO de la sala.
 public class ObtenerDetalleSubastaQueryHandler : IRequestHandler<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>
 {
     private readonly ISubastaRepository _subastaRepository;
@@ -24,13 +23,11 @@ public class ObtenerDetalleSubastaQueryHandler : IRequestHandler<ObtenerDetalleS
         ObtenerDetalleSubastaQuery request,
         CancellationToken cancellationToken = default)
     {
-        // 1. Buscamos la subasta con sus relaciones (categoría, vendedor y pujas)
         var subasta = await _subastaRepository.GetDetalleByIdAsync(request.Id);
 
         if (subasta is null)
             return null;
 
-        // 2. Calculamos el precio actual: la puja más alta o el precio base inicial si no hay pujas
         var pujaLider = subasta.Pujas.OrderByDescending(p => p.Monto).FirstOrDefault();
 
         decimal precioActual;
@@ -38,7 +35,6 @@ public class ObtenerDetalleSubastaQueryHandler : IRequestHandler<ObtenerDetalleS
             precioActual = pujaLider.Monto;
         }else { precioActual = subasta.PrecioBase;}
 
-        // 3. Proyectamos las pujas ordenadas de la más reciente a la más antigua
         var ultimasPujasDto = subasta.Pujas
         .OrderByDescending(p => p.FechaPuja)
         .Select(p => new PujaDTO(
@@ -50,7 +46,6 @@ public class ObtenerDetalleSubastaQueryHandler : IRequestHandler<ObtenerDetalleS
         ))
         .ToList();
 
-        // 4. Proyectamos y retornamos el DTO de detalle completo
         return new SubastaDetalleDTO(
             subasta.Id,
             subasta.Titulo,

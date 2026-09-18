@@ -18,13 +18,11 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // 1. OBLIGATORIO: Llama al mapeo base de las tablas de Identity
         base.OnModelCreating(modelBuilder);
 
-        // 2. Mapeo personalizado para propiedades exclusivas de tu entidad Usuario
         modelBuilder.Entity<Usuario>(entity =>
         {
-            entity.ToTable("Usuarios"); // Mantiene la tabla personalizada 'Usuarios' en lugar de 'AspNetUsers'
+            entity.ToTable("Usuarios"); 
 
             entity.Property(e => e.Nombre)
                 .IsRequired()
@@ -34,7 +32,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                 .HasDefaultValueSql("GETUTCDATE()");
         });
 
-        // CATEGORIA
         modelBuilder.Entity<Categoria>(entity =>
         {
             entity.ToTable("Categorias");
@@ -42,7 +39,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
             entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
         });
 
-        // BILLETERA
         modelBuilder.Entity<Billetera>(entity =>
         {
             entity.ToTable("Billeteras");
@@ -61,7 +57,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // SUBASTA
         modelBuilder.Entity<Subasta>(entity =>
         {
             entity.ToTable("Subastas");
@@ -90,7 +85,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // PUJA
         modelBuilder.Entity<Puja>(entity =>
         {
             entity.ToTable("Pujas");
@@ -113,7 +107,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // TRANSACCION_LEDGER
         modelBuilder.Entity<TransaccionLedger>(entity =>
         {
             entity.ToTable("TransaccionesLedger");
@@ -135,7 +128,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // AUDITORIA
         modelBuilder.Entity<Auditoria>(entity =>
         {
             entity.ToTable("Auditorias");
@@ -153,11 +145,10 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // Carga de datos iniciales
         DataSeeder.Seed(modelBuilder);
     }
 
-    // Sobrescribimos SaveChangesAsync para evitar modificaciones o eliminaciones de registros de auditor�a
+    // Sobrescribimos SaveChangesAsync para evitar modificaciones o eliminaciones de registros de auditoria
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var auditoriasModificadas = ChangeTracker.Entries<Auditoria>()

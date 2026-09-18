@@ -21,24 +21,20 @@ public class IniciarSesionCommandHandler : IRequestHandler<IniciarSesionCommand,
 
     public async Task<LoginRespuestaDTO> HandleAsync(IniciarSesionCommand request, CancellationToken cancellationToken = default)
     {
-        // 1. Buscar el usuario por email
         var usuario = await _userManager.FindByEmailAsync(request.Email);
         if (usuario == null)
         {
             throw new InvalidOperationException("Credenciales inválidas.");
         }
 
-        // 2. Comprobar la contraseña
         var esPasswordValida = await _userManager.CheckPasswordAsync(usuario, request.Password);
         if (!esPasswordValida)
         {
             throw new InvalidOperationException("Credenciales inválidas.");
         }
 
-        // 3. Generar el Token JWT
         var token = _jwtProvider.GenerarToken(usuario);
 
-        // 4. Retornar DTO con el Token
         return new LoginRespuestaDTO(
             usuario.Id,
             usuario.Nombre,

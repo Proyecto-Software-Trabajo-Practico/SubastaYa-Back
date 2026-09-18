@@ -115,7 +115,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Registro de Handlers y Mediador
 builder.Services.AddScoped<IRequestHandler<ObtenerCategoriasQuery, List<CategoriaDto>>, ObtenerCategoriasQueryHandler>();
 builder.Services.AddScoped<IRequestHandler<RegistrarUsuarioCommand, UsuarioDTO>, RegistrarUsuarioCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerSaldosQuery, BilleteraSaldosDto?>, ObtenerSaldosQueryHandler>();
@@ -134,16 +133,12 @@ builder.Services.AddScoped<IRequestHandler<CrearPujaCommand, PujaDTO>, CrearPuja
 builder.Services.AddScoped<IRequestHandler<ProcesarSubastasFinalizadasCommand, SubastasProcesadasDTO>, ProcesarSubastasFinalizadasCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ActivarSubastasIniciadasCommand, int>, ActivarSubastasIniciadasCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ObtenerSubastasOfertadasPorUsuarioQuery, ResultadoPaginadoDTO<SubastaCardDTO>>, ObtenerSubastasOfertadasPorUsuarioQueryHandler>();
-// Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
-// Registrar SignalR
 builder.Services.AddSignalR();
-// Registro del Background Worker para barrido periódico de subastas vencidas
 builder.Services.AddHostedService<SubastasVencidasWorker>();
 
 builder.Services.AddHostedService<SubastasIniciadasWorker>();
 
-// Controllers
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -160,7 +155,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 
-// El orden importa: Primero quién es, luego qué puede hacer
 app.UseAuthentication();
 app.UseAuthorization();
 

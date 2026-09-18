@@ -15,6 +15,7 @@ public class Puja : BaseEntity
     public decimal Monto { get; private set; }
     public DateTime FechaPuja { get; private set; }
 
+    //Control de concurrencia optimista (Optimistic Locking) mapeado a rowversion nativo de SQL Server.
     public byte[] RowVersion { get; private set; } = null!;
 
     public Puja(int subastaId, int compradorId, decimal monto)
@@ -30,5 +31,5 @@ public class Puja : BaseEntity
 
     private Puja() 
     { 
-    } // Para EF Core
+    } 
 }

@@ -21,7 +21,6 @@ public record CrearSubastaCommand(
     DateTime FechaFin
 )
 {
-    // Constructor de conveniencia para mapear directamente desde el DTO recibido en el Controller
     public CrearSubastaCommand(int vendedorId, CrearSubastaDTO dto) : this(
         vendedorId,
         dto.CategoriaId,
