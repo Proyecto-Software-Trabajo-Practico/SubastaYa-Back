@@ -1,4 +1,5 @@
-﻿using Domain.Exceptions;
+using Domain.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace SubastaYa.Middlewares;
@@ -56,8 +57,29 @@ public class ExceptionMiddleware
 
     private static async Task ManejarExcepcionAsync(HttpContext context, int statusCode, string mensaje)
     {
-        context.Response.ContentType = "application/json";
+        context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = statusCode;
-        await context.Response.WriteAsJsonAsync(new { error = mensaje });
+
+        var problemDetails = new ProblemDetails
+        {
+            Status = statusCode,
+            Title = ObtenerTituloPorCodigo(statusCode),
+            Detail = mensaje,
+            Instance = context.Request.Path
+        };
+
+        // Propiedad de compatibilidad directa para consumidores que lean .error
+        problemDetails.Extensions["error"] = mensaje;
+
+        await context.Response.WriteAsJsonAsync(problemDetails);
     }
+
+    private static string ObtenerTituloPorCodigo(int statusCode) => statusCode switch
+    {
+        StatusCodes.Status400BadRequest => "Bad Request",
+        StatusCodes.Status403Forbidden => "Forbidden",
+        StatusCodes.Status404NotFound => "Not Found",
+        StatusCodes.Status409Conflict => "Conflict",
+        _ => "Internal Server Error"
+    };
 }

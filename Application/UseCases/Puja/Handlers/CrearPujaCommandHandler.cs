@@ -9,10 +9,7 @@ using System.Text.Json;
 
 namespace Application.UseCases.Pujas.Handlers;
 
-/// <summary>
-/// Handler de Aplicación (CQRS): Orquesta la creación de una puja, la retención de saldos,
-/// la extensión de tiempo por anti-sniping, los registros contables y las notificaciones en tiempo real.
-/// </summary>
+
 public class CrearPujaCommandHandler : IRequestHandler<CrearPujaCommand, PujaDTO>
 {
     // Repositorios e interfaces de infraestructura inyectados mediante Inyección de Dependencias (DI)

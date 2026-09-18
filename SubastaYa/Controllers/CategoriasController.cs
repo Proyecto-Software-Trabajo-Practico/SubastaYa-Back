@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+using Application.DTOs;
 using Application.Interfaces;
 using Application.UseCases.Categorias.Queries;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +17,7 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(List<CategoriaDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ObtenerTodas(CancellationToken cancellationToken)
     {
         // Especificamos el tipo de Query y la respuesta esperada List<CategoriaDto>

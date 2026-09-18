@@ -23,6 +23,8 @@ public class BilleterasController : ControllerBase
     // Ruta: GET /api/billeteras/{usuarioId}/saldos
     
     [HttpGet("{usuarioId:int}/saldos")]
+    [ProducesResponseType(typeof(BilleteraSaldosDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ObtenerSaldos(int usuarioId, CancellationToken cancellationToken)
     {
         var resultado = await _mediator.SendAsync<ObtenerSaldosQuery, BilleteraSaldosDto?>(
@@ -37,7 +39,11 @@ public class BilleterasController : ControllerBase
 
         return Ok(resultado);
     }
+
     [HttpPost("{usuarioId:int}/depositos")]
+    [ProducesResponseType(typeof(BilleteraSaldosDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Depositar(
         int usuarioId,
         [FromBody] CargarSaldoDto request,

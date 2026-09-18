@@ -8,7 +8,7 @@ namespace SubastaYa.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auditorias")]
 public class AuditoriaController : ControllerBase
 {
     private readonly IMediator _mediator;

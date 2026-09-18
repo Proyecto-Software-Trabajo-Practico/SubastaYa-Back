@@ -21,6 +21,8 @@ public class SubastasController : ControllerBase
 
     
     [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(SubastaDetalleDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ObtenerDetalle(int id, CancellationToken cancellationToken)
     {
         var subasta = await _mediator.SendAsync<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>(

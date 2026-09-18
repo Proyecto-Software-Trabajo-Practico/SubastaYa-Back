@@ -72,6 +72,10 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
             entity.Property(e => e.PrecioBase).HasColumnType("decimal(18,2)");
             entity.Property(e => e.IncrementoMinimo).HasColumnType("decimal(18,2)");
 
+            // Índices para optimizar consultas de catálogo y barrido del Background Worker
+            entity.HasIndex(e => e.Estado);
+            entity.HasIndex(e => e.FechaFin);
+
             // Mapeo a timestamp/rowversion nativo de SQL Server
             entity.Property(e => e.RowVersion).IsRowVersion();
 
@@ -139,6 +143,9 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
 
             entity.Property(e => e.Fecha).HasDefaultValueSql("GETUTCDATE()");
 
+            // Índice compuesto para agilizar búsquedas de auditoría por entidad
+            entity.HasIndex(e => new { e.Entidad, e.EntidadId });
+
             entity.HasOne(e => e.Usuario)
                   .WithMany()
                   .HasForeignKey(e => e.UsuarioId)
@@ -150,7 +157,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
         DataSeeder.Seed(modelBuilder);
     }
 
-    // Sobrescribimos SaveChangesAsync para evitar modificaciones o eliminaciones de registros de auditor�a
+    // Sobrescribimos SaveChangesAsync para evitar modificaciones o eliminaciones de registros de auditor�a
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var auditoriasModificadas = ChangeTracker.Entries<Auditoria>()
@@ -158,7 +165,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
 
         if (auditoriasModificadas)
         {
-            throw new InvalidOperationException("Los registros de auditor�a son inmutables y no pueden ser modificados ni eliminados.");
+            throw new InvalidOperationException("Los registros de auditor�a son inmutables y no pueden ser modificados ni eliminados.");
         }
 
         return base.SaveChangesAsync(cancellationToken);
