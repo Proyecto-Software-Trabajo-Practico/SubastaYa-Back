@@ -1,22 +1,66 @@
-# SubastaYa - Backend Web API (.NET 8)
+# SubastaYa - Backend API (.NET 8)
 
-Backend para el sistema de subastas SubastaYa, desarrollado en C# y .NET 8 siguiendo los principios de Clean Architecture con separación en las capas Domain, Application, Data y SubastaYa API.
+Backend de SubastaYa, plataforma web de subastas en tiempo real desarrollada con C# .NET 8, 
+Entity Framework Core (Code-First) y SQL Server, aplicando principios de Clean Architecture y 
+patrones de diseño orientados a alta concurrencia.
 
-Para ejecutar el proyecto en un entorno local es necesario contar con .NET 8 SDK (o Visual Studio 2022 con la carga de trabajo Desarrollo de ASP.NET y web), Docker Desktop en ejecución y Git.
+---
 
-El primer paso para iniciar es clonar el repositorio mediante el comando `git clone https://github.com/Proyecto-Software-Trabajo-Practico/SubastaYa-Back.git` y posicionarse dentro de la carpeta del proyecto. A continuación, se debe levantar la base de datos SQL Server 2022 en Docker abriendo una terminal en la raíz de la solución y ejecutando `docker compose up -d`, lo cual creará y pondrá en marcha el contenedor escuchando en el puerto 1433[cite: 1]. Una vez activo el contenedor, se deben impactar las migraciones de Entity Framework Core para crear la base de datos SubastaYaDb y sus tablas ejecutando `Update-Database -Project Data -StartupProject SubastaYa` desde la Consola del Administrador de Paquetes en Visual Studio, o bien `dotnet ef database update --project Data --startup-project SubastaYa` desde la terminal de comandos[cite: 1]. Con la base de datos lista, la Web API se puede iniciar presionando F5 en Visual Studio o ejecutando `dotnet run --project SubastaYa` desde la consola. Al iniciar la aplicación, la documentación interactiva estará disponible a través de Swagger UI en la ruta `https://localhost:7127/swagger`. Finalmente, para detener el servicio de base de datos al concluir la sesión de trabajo sin perder la información guardada, basta con ejecutar el comando `docker compose down`[cite: 1].
+## Tecnologías y Arquitectura
 
-Script de Automatización: Se utilizó un script en Powershell ejecutando dos pujas en paralelo
+* **Framework:** .NET 8 Web API
+* **Persistencia:** Entity Framework Core (Enfoque Code-First)
+* **Base de Datos:** SQL Server 2022 (Dockerizada)
+* **Concurrencia:** Optimistic Locking (Campo `RowVersion` en Subasta y Billetera)
+* **Tiempo Real:** SignalR (WebSockets)
+* **Procesos en Segundo Plano:** Background Worker (`BackgroundService`) para cierre automático de subastas y liquidación atómica (Escrow)
+* **Documentación:** OpenAPI / Swagger UI
 
-/*
+---
+
+## Requisitos Previos e Instalación
+
+### 1. Requisitos
+* Docker Desktop en ejecución
+* .NET 8 SDK
+
+### 2. Levantar la Base de Datos con Docker
+Desde la raíz del proyecto backend (`SubastaYa-Back`), ejecutar en la terminal:
+
+```bash
+docker compose up -d
+```
+
+### 3. Ejecutar Migraciones y Seed Data
+Las migraciones incluyen la creación del esquema y la carga de datos iniciales (usuarios, billeteras, subastas de prueba):
+
+```bash
+dotnet ef database update --project Infrastructure --startup-project SubastaYa
+```
+
+### 4. Ejecutar la Web API
+```bash
+dotnet run --project SubastaYa
+```
+
+La documentación interactiva y los endpoints estarán disponibles en:
+* **Swagger UI:** `https://localhost:7127/swagger`
+
+---
+
+## Validación de Concurrencia (Stress Test)
+
+Para verificar el control de concurrencia optimista (**Optimistic Concurrency**) ante condiciones de carrera (dos postores ofertando en el mismo milisegundo), se incluye el script en PowerShell `test_concurrencia.ps1`:
+
+```powershell
 param (
-    [string]$Url = "url/api/Pujas", 
+    [string]$Url = "https://localhost:7127/api/Pujas", 
     [string]$Token = "Token JWT", 
-    [int]$SubastaId = id,
-    [decimal]$Monto = Monto
+    [int]$SubastaId = 2001,
+    [decimal]$Monto = 50000.00
 )
 
-# Ignorar certificado SSL a nivel de sesion principal
+# Ignorar certificado SSL a nivel de sesión principal
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
 
 $headers = @{
@@ -32,11 +76,9 @@ $body = @{
 $scriptBlock = {
     param($endpoint, $hdrs, $payload)
     
-    # Ignorar certificado SSL dentro de cada hilo secundario
     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
     
     try {
-        # Removido el parametro -SkipCertificateCheck incompatiible con PowerShell 5.1
         $response = Invoke-RestMethod -Uri $endpoint -Method Post -Headers $hdrs -Body $payload
         return "SUCCESS (201 Created) - Puja procesada correctamente."
     }
@@ -65,12 +107,16 @@ Write-Host "Peticion 1: $res1"
 Write-Host "Peticion 2: $res2"
 
 Remove-Job -Job $job1, $job2
-*/
+```
 
-Resultado obtenido:
+### Resultado obtenido ante colisión concurrente:
 
+```text
 Lanzando 2 peticiones simultaneas en el mismo milisegundo...
 
 --- RESULTADOS DEL STRESS TEST ---
 Peticion 1: SUCCESS (201 Created) - Puja procesada correctamente.
 Peticion 2: RESPUESTA HTTP 409 - DETALLE: {"error":"Otra operación modificó el recurso al mismo tiempo. Por favor actualizá y reintentá."}
+```
+
+>  El código HTTP `409 Conflict` en la segunda petición demuestra que la transacción detectó una incompatibilidad en la versión (`RowVersion`) del registro, impidiendo inconsistencias de saldo o estados corruptos sin necesidad de bloqueos pesados en la base de datos.
