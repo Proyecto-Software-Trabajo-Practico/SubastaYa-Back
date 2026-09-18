@@ -37,20 +37,6 @@ public class BilleterasController : ControllerBase
 
         return Ok(resultado);
     }
-    [HttpPost("{usuarioId:int}/depositos")]
-    public async Task<IActionResult> Depositar(
-        int usuarioId,
-        [FromBody] CargarSaldoDto request,
-        CancellationToken cancellationToken)
-    {
-        var command = new DepositarFondosCommand(usuarioId, request.Monto);
-
-        var saldosActualizados = await _mediator.SendAsync<DepositarFondosCommand, BilleteraSaldosDto>(
-            command,
-            cancellationToken
-        );
-        return Ok(saldosActualizados);
-    }
     
     [HttpGet("{usuarioId:int}/transacciones")]
     [ProducesResponseType(typeof(ResultadoPaginadoDTO<TransaccionLedgerDTO>), StatusCodes.Status200OK)]
@@ -72,5 +58,20 @@ public class BilleterasController : ControllerBase
         }
 
         return Ok(transacciones);
+    }
+
+    [HttpPost("{usuarioId:int}/depositos")]
+    public async Task<IActionResult> Depositar(
+        int usuarioId,
+        [FromBody] CargarSaldoDto request,
+        CancellationToken cancellationToken)
+    {
+        var command = new DepositarFondosCommand(usuarioId, request.Monto);
+
+        var saldosActualizados = await _mediator.SendAsync<DepositarFondosCommand, BilleteraSaldosDto>(
+            command,
+            cancellationToken
+        );
+        return Ok(saldosActualizados);
     }
 }

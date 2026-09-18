@@ -26,5 +26,11 @@ namespace Application.Interfaces
         Task AddAsync(Subasta subasta);
         void Update(Subasta subasta);
         void Delete(Subasta subasta);
+        Task<(IReadOnlyList<Subasta> Items, int TotalItems)> GetOfertadasByCompradorPaginadoAsync(
+        int compradorId,
+        int pagina,
+        int tamanoPagina,
+        CancellationToken cancellationToken = default
+        );
     }
 }

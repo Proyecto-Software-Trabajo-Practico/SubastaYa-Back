@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-namespace Application.DTOs;
-
+﻿namespace Application.DTOs;
 
 public record SubastaCardDTO(
     int Id,
@@ -16,5 +10,6 @@ public record SubastaCardDTO(
     int CantidadPujas,
     DateTime FechaFin,
     int CategoriaId,
-    string CategoriaNombre
+    string CategoriaNombre,
+    int? CompradorGanadorId = null
 );
