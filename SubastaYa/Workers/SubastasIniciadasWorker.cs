@@ -9,11 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace SubastaYa.Workers;
 
-/*
- * Worker en segundo plano encargado de activar periódicamente las subastas programadas
- * cuya fecha y hora de inicio ya se ha cumplido.
- * Se ejecuta cada 5 segundos de forma desacoplada mediante IMediator.
- */
+
 public class SubastasIniciadasWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;

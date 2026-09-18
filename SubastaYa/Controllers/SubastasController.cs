@@ -21,6 +21,8 @@ public class SubastasController : ControllerBase
 
     
     [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(SubastaDetalleDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ObtenerDetalle(int id, CancellationToken cancellationToken)
     {
         var subasta = await _mediator.SendAsync<ObtenerDetalleSubastaQuery, SubastaDetalleDTO?>(
@@ -36,7 +38,6 @@ public class SubastasController : ControllerBase
         return Ok(subasta);
     }
 
-    //Permite consultar el catálogo público de subastas con filtros opcionales (estado, categoría) y ordenamiento dinámico.
 
     [HttpGet]
     [ProducesResponseType(typeof(ResultadoPaginadoDTO<SubastaCardDTO>), StatusCodes.Status200OK)]
@@ -59,7 +60,6 @@ public class SubastasController : ControllerBase
         return Ok(subastas);
     }
 
-    //Permite a un vendedor autenticado publicar una nueva subasta.
 
     [Authorize]
     [HttpPost]

@@ -10,7 +10,6 @@ namespace Infrastructure.Persistence
         {
             var now = DateTime.UtcNow;
 
-            // 1. USUARIOS (Adaptados a ASP.NET Core Identity)
             modelBuilder.Entity<Usuario>().HasData(
                 new
                 {
@@ -86,7 +85,6 @@ namespace Infrastructure.Persistence
                 }
             );
 
-            // 2. BILLETERAS
             modelBuilder.Entity<Billetera>().HasData(
                 new { Id = 1, UsuarioId = 1, SaldoTotal = 0m, SaldoRetenido = 0m, SaldoDisponible = 0m, Version = 1 },
                 new { Id = 2, UsuarioId = 2, SaldoTotal = 150000m, SaldoRetenido = 45000m, SaldoDisponible = 105000m, Version = 1 },
@@ -94,7 +92,6 @@ namespace Infrastructure.Persistence
                 new { Id = 4, UsuarioId = 4, SaldoTotal = 500m, SaldoRetenido = 0m, SaldoDisponible = 500m, Version = 1 }
             );
 
-            // 3. CATEGORÍAS
             modelBuilder.Entity<Categoria>().HasData(
                 new { Id = 1, Nombre = "Tecnología" },
                 new { Id = 2, Nombre = "Coleccionables" },
@@ -102,7 +99,6 @@ namespace Infrastructure.Persistence
                 new { Id = 4, Nombre = "Vehículos" }
             );
 
-            // 4. SUBASTAS
             modelBuilder.Entity<Subasta>().HasData(
                 new { Id = 1, VendedorId = 1, CategoriaId = 1, Titulo = "Activa Estándar", Descripcion = "Subasta con 2 pujas.", PrecioBase = 10000m, IncrementoMinimo = 5000m, FechaInicio = now.AddHours(-1), FechaFin = now.AddMinutes(25), Estado = "ACTIVA", Version = 1 },
                 new { Id = 2, VendedorId = 1, CategoriaId = 1, Titulo = "Activa Crítica", Descripcion = "Alerta visual anti-sniping.", PrecioBase = 5000m, IncrementoMinimo = 1000m, FechaInicio = now.AddHours(-1), FechaFin = now.AddMinutes(1), Estado = "ACTIVA", Version = 1 },
@@ -111,14 +107,12 @@ namespace Infrastructure.Persistence
                 new { Id = 5, VendedorId = 1, CategoriaId = 4, Titulo = "Vencida Desierta", Descripcion = "Nadie pujó.", PrecioBase = 50000m, IncrementoMinimo = 5000m, FechaInicio = now.AddDays(-2), FechaFin = now.AddDays(-1), Estado = "ACTIVA", Version = 1 }
             );
 
-            // 5. PUJAS
             modelBuilder.Entity<Puja>().HasData(
                 new { Id = 1, SubastaId = 1, CompradorId = 3, Monto = 20000m, FechaPuja = now.AddMinutes(-20) },
                 new { Id = 2, SubastaId = 1, CompradorId = 2, Monto = 45000m, FechaPuja = now.AddMinutes(-5) },
                 new { Id = 3, SubastaId = 4, CompradorId = 3, Monto = 6000m, FechaPuja = now.AddDays(-1).AddMinutes(-10) }
             );
 
-            // 6. REGISTROS CONTABLES (Ledger)
             modelBuilder.Entity<TransaccionLedger>().HasData(
                 new { Id = 1, BilleteraId = 2, Tipo = "DEPOSITO", Monto = 150000m, Fecha = now.AddDays(-1) },
                 new { Id = 2, BilleteraId = 2, Tipo = "RETENCION", Monto = 45000m, Fecha = now.AddMinutes(-5), SubastaId = 1 },

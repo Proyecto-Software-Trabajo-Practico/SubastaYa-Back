@@ -28,10 +28,8 @@ public class RegistrarUsuarioCommandHandler : IRequestHandler<RegistrarUsuarioCo
 
     public async Task<UsuarioDTO> HandleAsync(RegistrarUsuarioCommand request, CancellationToken cancellationToken = default)
     {
-        // 1. Crear la instancia de Usuario
         var usuario = new Usuario(request.Email, request.Nombre);
 
-        // 2. Persistir Usuario mediante ASP.NET Core Identity
         var result = await _userManager.CreateAsync(usuario, request.Password);
         if (!result.Succeeded)
         {
@@ -39,11 +37,9 @@ public class RegistrarUsuarioCommandHandler : IRequestHandler<RegistrarUsuarioCo
             throw new InvalidOperationException($"No se pudo registrar el usuario: {errores}");
         }
 
-        // 3. Crear Billetera asociada al ID asignado (1:1)
         var billetera = new Billetera(usuario.Id);
         await _billeteraRepository.AddAsync(billetera);
 
-        // 4. Crear Log de Auditoría
         var detalleAuditoria = JsonSerializer.Serialize(new
         {
             Email = usuario.Email,
@@ -60,10 +56,8 @@ public class RegistrarUsuarioCommandHandler : IRequestHandler<RegistrarUsuarioCo
         );
         await _auditoriaRepository.AddAsync(logAuditoria);
 
-        // 5. Guardar transaccionalmente Billetera y Auditoría
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // 6. Retornar DTO de respuesta
         return new UsuarioDTO(usuario.Id, usuario.Nombre, usuario.Email!, usuario.FechaRegistro);
     }
 }

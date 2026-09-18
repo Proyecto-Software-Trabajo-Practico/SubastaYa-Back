@@ -18,13 +18,11 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // 1. OBLIGATORIO: Llama al mapeo base de las tablas de Identity
         base.OnModelCreating(modelBuilder);
 
-        // 2. Mapeo personalizado para propiedades exclusivas de tu entidad Usuario
         modelBuilder.Entity<Usuario>(entity =>
         {
-            entity.ToTable("Usuarios"); // Mantiene la tabla personalizada 'Usuarios' en lugar de 'AspNetUsers'
+            entity.ToTable("Usuarios"); 
 
             entity.Property(e => e.Nombre)
                 .IsRequired()
@@ -34,7 +32,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                 .HasDefaultValueSql("GETUTCDATE()");
         });
 
-        // CATEGORIA
         modelBuilder.Entity<Categoria>(entity =>
         {
             entity.ToTable("Categorias");
@@ -42,7 +39,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
             entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
         });
 
-        // BILLETERA
         modelBuilder.Entity<Billetera>(entity =>
         {
             entity.ToTable("Billeteras");
@@ -61,7 +57,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // SUBASTA
         modelBuilder.Entity<Subasta>(entity =>
         {
             entity.ToTable("Subastas");
@@ -71,6 +66,10 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
             entity.Property(e => e.Estado).IsRequired().HasMaxLength(50);
             entity.Property(e => e.PrecioBase).HasColumnType("decimal(18,2)");
             entity.Property(e => e.IncrementoMinimo).HasColumnType("decimal(18,2)");
+
+            // Índices para optimizar consultas de catálogo y barrido del Background Worker
+            entity.HasIndex(e => e.Estado);
+            entity.HasIndex(e => e.FechaFin);
 
             // Mapeo a timestamp/rowversion nativo de SQL Server
             entity.Property(e => e.RowVersion).IsRowVersion();
@@ -86,7 +85,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // PUJA
         modelBuilder.Entity<Puja>(entity =>
         {
             entity.ToTable("Pujas");
@@ -109,7 +107,6 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // TRANSACCION_LEDGER
         modelBuilder.Entity<TransaccionLedger>(entity =>
         {
             entity.ToTable("TransaccionesLedger");
@@ -131,13 +128,15 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // AUDITORIA
         modelBuilder.Entity<Auditoria>(entity =>
         {
             entity.ToTable("Auditorias");
             entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Fecha).HasDefaultValueSql("GETUTCDATE()");
+
+            // Índice compuesto para agilizar búsquedas de auditoría por entidad
+            entity.HasIndex(e => new { e.Entidad, e.EntidadId });
 
             entity.HasOne(e => e.Usuario)
                   .WithMany()
@@ -146,11 +145,10 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // Carga de datos iniciales
         DataSeeder.Seed(modelBuilder);
     }
 
-    // Sobrescribimos SaveChangesAsync para evitar modificaciones o eliminaciones de registros de auditor�a
+    // Sobrescribimos SaveChangesAsync para evitar modificaciones o eliminaciones de registros de auditoria
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var auditoriasModificadas = ChangeTracker.Entries<Auditoria>()
@@ -158,7 +156,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole<int>, int>
 
         if (auditoriasModificadas)
         {
-            throw new InvalidOperationException("Los registros de auditor�a son inmutables y no pueden ser modificados ni eliminados.");
+            throw new InvalidOperationException("Los registros de auditor�a son inmutables y no pueden ser modificados ni eliminados.");
         }
 
         return base.SaveChangesAsync(cancellationToken);

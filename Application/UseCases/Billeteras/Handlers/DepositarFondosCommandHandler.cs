@@ -10,11 +10,7 @@ using Domain.Exceptions;
 
 namespace Application.UseCases.Billeteras.Handlers;
 
-/*
- * Handler responsable de acreditar fondos simulados en la billetera de un usuario.
- * Modifica el saldo en Dominio, genera el asiento contable inmutable en el Ledger,
- * registra el evento obligatorio en Auditoría y confirma todo atómicamente con IUnitOfWork.
- */
+
 public class DepositarFondosCommandHandler : IRequestHandler<DepositarFondosCommand, BilleteraSaldosDto>
 {
     private readonly IBilleteraRepository _billeteraRepository;

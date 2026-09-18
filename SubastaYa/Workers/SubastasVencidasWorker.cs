@@ -10,11 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace SubastaYa.Workers;
 
-/*
- * Worker en segundo plano encargado de monitorear periódicamente las subastas vencidas
- * para su cierre automático, liquidación de fondos Escrow y auditoría.
- * Se ejecuta cada 30 segundos de forma desacoplada mediante IMediator.
- */
+
 public class SubastasVencidasWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;

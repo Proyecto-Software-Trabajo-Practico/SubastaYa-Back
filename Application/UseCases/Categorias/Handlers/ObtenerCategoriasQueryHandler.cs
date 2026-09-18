@@ -9,7 +9,6 @@ public class ObtenerCategoriasQueryHandler : IRequestHandler<ObtenerCategoriasQu
 {
     private readonly ICategoriaRepository _categoriaRepository;
 
-    // Inyección de dependencias (Principio DIP de SOLID)
     public ObtenerCategoriasQueryHandler(ICategoriaRepository categoriaRepository)
     {
         _categoriaRepository = categoriaRepository;

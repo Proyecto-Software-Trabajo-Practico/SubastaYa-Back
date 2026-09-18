@@ -16,7 +16,7 @@ public class Billetera : BaseEntity
 
     public virtual ICollection<TransaccionLedger> Transacciones { get; private set; } = new List<TransaccionLedger>();
 
-    // Control de concurrencia optimista (Optimistic Locking)
+    
     public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
     public Billetera(int usuarioId)

@@ -16,8 +16,7 @@ namespace Infrastructure.Persistence
             _context = context;
         }
 
-        // Propaga la señal de cancelación para interrumir la transacción SQL si la petición HTTP es
-        // abortada antes de finalizar.
+        
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await _context.SaveChangesAsync(cancellationToken);

@@ -41,7 +41,7 @@ public class ObtenerSubastasPorUsuarioQueryHandler
             return new SubastaVendedorDTO(
                 s.Id,
                 s.Titulo,
-                s.UrlImagen, // 🖼️ Devuelve la URL / Base64 de la imagen directamente
+                s.UrlImagen, 
                 s.Estado,
                 s.PrecioBase,
                 precioActual,

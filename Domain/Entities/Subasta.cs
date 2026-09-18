@@ -24,7 +24,10 @@ public class Subasta : BaseEntity
     public DateTime FechaFin { get; private set; }
     public string Estado { get; private set; }
 
-    // Control de concurrencia optimista (Optimistic Locking): RowVersion nativo de SQL Server
+    
+     //Control de concurrencia optimista (Optimistic Locking) mapeado a rowversion nativo de SQL Server.
+     
+     
     public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
     public Subasta(

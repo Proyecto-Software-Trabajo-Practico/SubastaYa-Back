@@ -47,7 +47,7 @@ public class ObtenerSubastasOfertadasPorUsuarioQueryHandler
                 s.FechaFin,
                 s.CategoriaId,
                 s.Categoria?.Nombre ?? "General",
-                compradorGanadorId // 👈 Mapeo del ID
+                compradorGanadorId 
             );
         }).ToList();
 

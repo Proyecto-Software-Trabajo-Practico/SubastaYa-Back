@@ -11,12 +11,7 @@ using Domain.Entities;
 
 namespace Application.UseCases.Subastas.Handlers;
 
-/*
- * Handler responsable del cierre masivo y liquidación contable de subastas vencidas.
- * Identifica ofertas ganadoras o desiertas, ejecuta el traspaso de fondos
- * mediante Escrow, genera asientos contables en Ledger, registra auditoría
- * y consolida todo atómicamente con IUnitOfWork.
- */
+
 public class ProcesarSubastasFinalizadasCommandHandler : IRequestHandler<ProcesarSubastasFinalizadasCommand, SubastasProcesadasDTO>
 {
     private readonly ISubastaRepository _subastaRepository;
@@ -41,7 +36,6 @@ public class ProcesarSubastasFinalizadasCommandHandler : IRequestHandler<Procesa
 
     public async Task<SubastasProcesadasDTO> HandleAsync(ProcesarSubastasFinalizadasCommand request, CancellationToken cancellationToken = default)
     {
-        // 1. Obtener todas las subastas activas cuya fecha de fin ya expiró
         var subastasVencidas = await _subastaRepository.GetSubastasVencidasParaCierreAsync();
 
         if (!subastasVencidas.Any())
@@ -59,13 +53,11 @@ public class ProcesarSubastasFinalizadasCommandHandler : IRequestHandler<Procesa
 
         foreach (var subasta in subastasVencidas)
         {
-            // Bifurcación de Negocio 1: Subasta sin postores
             if (!subasta.Pujas.Any())
             {
                 subasta.MarcarDesierta();
                 declaradasDesiertas++;
 
-                // Registro inmutable de Auditoría por pase a DESIERTA (Requerimiento 2.4)
                 var detalleAuditoriaDesierta = JsonSerializer.Serialize(new
                 {
                     SubastaId = subasta.Id,
@@ -138,7 +130,6 @@ public class ProcesarSubastasFinalizadasCommandHandler : IRequestHandler<Procesa
             await _auditoriaRepository.AddAsync(logAuditoria);
         }
 
-        // Confirmar todos los cambios en una única transacción atómica (ACID)
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SubastasProcesadasDTO(
