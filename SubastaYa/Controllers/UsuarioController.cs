@@ -1,10 +1,11 @@
-﻿using System.Security.Claims;
-using Application.DTOs;
+﻿using Application.DTOs;
 using Application.Interfaces;
+using Application.UseCases.Subastas.Queries;
 using Application.UseCases.Usuarios.Commands;
 using Application.UseCases.Usuarios.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace SubastaYa.Controllers;
 
@@ -26,6 +27,84 @@ public class UsuariosController : ControllerBase
         {
             throw new UnauthorizedAccessException("No tienes permiso para acceder o modificar este recurso.");
         }
+    }
+
+    /*
+     * GET /api/Usuarios/{id}/subastas
+     * Obtiene el listado paginado de publicaciones (como vendedor) del usuario especificado.
+     */
+    [Authorize]
+    [HttpGet("{vendedorId:int}/subastas")]
+    [ProducesResponseType(typeof(ResultadoPaginadoDTO<SubastaVendedorDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ObtenerSubastasPorUsuario(
+        [FromRoute] int vendedorId,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        if (!int.TryParse(claimId, out var usuarioAutenticadoId) || usuarioAutenticadoId != vendedorId)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { mensaje = "No tienes permiso para consultar las publicaciones de otro usuario." });
+        }
+
+        var query = new ObtenerSubastasPorUsuarioQuery(vendedorId, pagina, tamanoPagina);
+
+        var resultado = await _mediator.SendAsync<ObtenerSubastasPorUsuarioQuery, ResultadoPaginadoDTO<SubastaVendedorDTO>>(
+            query,
+            cancellationToken
+        );
+
+        return Ok(resultado);
+    }
+
+    /*
+     * GET /api/Usuarios/{id}/ofertas
+     * Obtiene el listado paginado de subastas donde el usuario especificado realizó ofertas.
+     */
+    [Authorize]
+    [HttpGet("{compradorId:int}/ofertas")]
+    [ProducesResponseType(typeof(ResultadoPaginadoDTO<SubastaCardDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ObtenerSubastasOfertadasPorUsuario(
+        [FromRoute] int compradorId,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 15,
+        CancellationToken cancellationToken = default)
+    {
+        var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        if (!int.TryParse(claimId, out var usuarioAutenticadoId) || usuarioAutenticadoId != compradorId)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { mensaje = "No tienes permiso para consultar las ofertas de otro usuario." });
+        }
+
+        var query = new ObtenerSubastasOfertadasPorUsuarioQuery(compradorId, pagina, tamanoPagina);
+
+        var resultado = await _mediator.SendAsync<ObtenerSubastasOfertadasPorUsuarioQuery, ResultadoPaginadoDTO<SubastaCardDTO>>(
+            query,
+            cancellationToken
+        );
+
+        return Ok(resultado);
+    }
+
+    [Authorize]
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(UsuarioDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ObtenerPorId(
+        [FromRoute] int id,
+        CancellationToken cancellationToken)
+    {
+        var query = new ObtenerUsuarioPorIdQuery(id);
+        var resultado = await _mediator.SendAsync<ObtenerUsuarioPorIdQuery, UsuarioDTO>(query, cancellationToken);
+        return Ok(resultado);
     }
 
     [HttpPost]
@@ -53,23 +132,7 @@ public class UsuariosController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("{id:int}")]
-    [ProducesResponseType(typeof(UsuarioDTO), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ObtenerPorId(
-        [FromRoute] int id,
-        CancellationToken cancellationToken)
-    {
-        var query = new ObtenerUsuarioPorIdQuery(id);
-        var resultado = await _mediator.SendAsync<ObtenerUsuarioPorIdQuery, UsuarioDTO>(query, cancellationToken);
-        return Ok(resultado);
-    }
-
-    [Authorize]
-    [HttpPut("{id:int}/email")]
+    [HttpPatch("{id:int}/email")]
     [ProducesResponseType(typeof(UsuarioDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -89,7 +152,7 @@ public class UsuariosController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("{id:int}/password")]
+    [HttpPatch("{id:int}/password")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -107,7 +170,4 @@ public class UsuariosController : ControllerBase
         await _mediator.SendAsync<CambiarPasswordCommand, bool>(command, cancellationToken);
         return NoContent();
     }
-
-
-
 }

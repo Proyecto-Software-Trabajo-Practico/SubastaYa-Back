@@ -133,6 +133,7 @@ builder.Services.AddScoped<IRequestHandler<ObtenerSubastasPorUsuarioQuery, Resul
 builder.Services.AddScoped<IRequestHandler<CrearPujaCommand, PujaDTO>, CrearPujaCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ProcesarSubastasFinalizadasCommand, SubastasProcesadasDTO>, ProcesarSubastasFinalizadasCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<ActivarSubastasIniciadasCommand, int>, ActivarSubastasIniciadasCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<ObtenerSubastasOfertadasPorUsuarioQuery, ResultadoPaginadoDTO<SubastaCardDTO>>, ObtenerSubastasOfertadasPorUsuarioQueryHandler>();
 // Registramos el Mediador: cuando alguien pida IMediator, .NET le entrega una instancia de Mediator
 builder.Services.AddScoped<IMediator, Mediator>();
 // Registrar SignalR

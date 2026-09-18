@@ -38,64 +38,8 @@ public class SubastasController : ControllerBase
         return Ok(subasta);
     }
 
-    /*
-     * Permite a un vendedor autenticado consultar el listado paginado de sus publicaciones
-     * con métricas de recaudación y estado de adjudicación para el panel de usuario (Módulo 5).
-     */
-    [Authorize]
-    [HttpGet("usuario/{vendedorId:int}")]
-    [ProducesResponseType(typeof(ResultadoPaginadoDTO<SubastaVendedorDTO>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> ObtenerSubastasPorUsuario(
-        [FromRoute] int vendedorId,
-        [FromQuery] int pagina = 1,
-        [FromQuery] int tamanoPagina = 10,
-        CancellationToken cancellationToken = default)
-    {
-        // Validar que el usuario autenticado en el token JWT sea el propietario del panel
-        var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
-        if (!int.TryParse(claimId, out var usuarioAutenticadoId) || usuarioAutenticadoId != vendedorId)
-        {
-            throw new UnauthorizedAccessException("No tienes permiso para consultar las publicaciones de otro usuario.");
-        }
+    //Permite consultar el catálogo público de subastas con filtros opcionales (estado, categoría) y ordenamiento dinámico.
 
-        var query = new ObtenerSubastasPorUsuarioQuery(vendedorId, pagina, tamanoPagina);
-
-        var resultado = await _mediator.SendAsync<ObtenerSubastasPorUsuarioQuery, ResultadoPaginadoDTO<SubastaVendedorDTO>>(
-            query,
-            cancellationToken
-        );
-
-        return Ok(resultado);
-    }
-    
-    //Permite a un vendedor autenticado publicar una nueva subasta.
-    
-    [Authorize]
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> CrearSubasta(
-        [FromBody] CrearSubastaDTO request,
-        CancellationToken cancellationToken)
-    {
-        var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
-        if (!int.TryParse(claimId, out var vendedorId))
-        {
-            return Unauthorized(new { error = "No se pudo identificar al usuario autenticado a partir del token." });
-        }
-
-        var command = new CrearSubastaCommand(vendedorId, request);
-
-        var subastaId = await _mediator.SendAsync<CrearSubastaCommand, int>(command, cancellationToken);
-
-        return CreatedAtAction(nameof(ObtenerDetalle), new { id = subastaId }, new { id = subastaId });
-    }
-    
-     //Permite consultar el catálogo público de subastas con filtros opcionales (estado, categoría) y ordenamiento dinámico.
-    
     [HttpGet]
     [ProducesResponseType(typeof(ResultadoPaginadoDTO<SubastaCardDTO>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ObtenerSubastas(
@@ -117,8 +61,32 @@ public class SubastasController : ControllerBase
         return Ok(subastas);
     }
 
+    //Permite a un vendedor autenticado publicar una nueva subasta.
+
+    [Authorize]
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CrearSubasta(
+        [FromBody] CrearSubastaDTO request,
+        CancellationToken cancellationToken)
+    {
+        var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        if (!int.TryParse(claimId, out var vendedorId))
+        {
+            return Unauthorized(new { error = "No se pudo identificar al usuario autenticado a partir del token." });
+        }
+
+        var command = new CrearSubastaCommand(vendedorId, request);
+
+        var subastaId = await _mediator.SendAsync<CrearSubastaCommand, int>(command, cancellationToken);
+
+        return CreatedAtAction(nameof(ObtenerDetalle), new { id = subastaId }, new { id = subastaId });
+    }
+
     // Dispara manualmente el procesamiento y liquidación contable de subastas vencidas.
-    [HttpPost("procesar-finalizadas")]
+    [HttpPost("procesos")]
     [ProducesResponseType(typeof(SubastasProcesadasDTO), StatusCodes.Status200OK)]
     public async Task<IActionResult> ProcesarFinalizadas(CancellationToken cancellationToken)
     {
